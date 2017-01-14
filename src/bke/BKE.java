@@ -11,7 +11,7 @@ import javax.swing.*;
 public class BKE extends JFrame {
 
     public static Font spelFont = new Font("Berlin Sans FB", Font.PLAIN, 100);
-    public static Font textFont = new Font("Arial", Font.PLAIN, 20);
+    public static Font textFont = new Font("Berlin Sans FB", Font.PLAIN, 20);
     
     public static JLabel scoreLabX, scoreLabO;
     private JButton reset, menuKnop, tegenSpeler;
@@ -52,11 +52,16 @@ public class BKE extends JFrame {
         
         JPanel UI = new JPanel();
         UI.setLayout(new BorderLayout());
-//        gewonnen = new JTextField(10);
-//        gewonnen.setFont(textFont);
-//        gewonnen.setHorizontalAlignment(SwingConstants.CENTER);
         
-        scoreLabX = new JLabel();
+        scoreLabX = new JLabel("X : 0", SwingConstants.CENTER);
+        scoreLabO = new JLabel("O : 0", SwingConstants.CENTER);
+        
+        scoreLabX.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
+        scoreLabO.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
+        
+        scoreLabX.setFont(textFont);
+        scoreLabO.setFont(textFont);
+        
         reset = new JButton("Reset");
         reset.addActionListener(new ResetHandeler());
         
@@ -67,33 +72,24 @@ public class BKE extends JFrame {
             }
         });
         
-        UI.add(menuKnop, BorderLayout.LINE_START);
-        UI.add(scoreLabX, BorderLayout.CENTER);
-        UI.add(reset, BorderLayout.LINE_END);
-        UI.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        
+        UI.add(menuKnop);
+        UI.add(scoreLabX);
+        UI.add(scoreLabO);
+        UI.add(reset);
+        UI.setPreferredSize(new Dimension(10, 100));
+        UI.setLayout(new GridLayout(1,4,10,0));
+
         JPanel spelBord = new JPanel();
-        //spelBord.setBorder(BorderFactory.createEmptyBorder(10,20,0,20));
 
         spelBord.setLayout(new BorderLayout(60,40));
         
-//        JButton button = new JButton("Button 3 (LINE_START)");
-//        spelBord.add(button, BorderLayout.LINE_START);
-//        button.setPreferredSize(new Dimension(0, 0));   
-//        button = new JButton("5 (LINE_END)");
-//        spelBord.add(button, BorderLayout.LINE_END);
-//        button.setPreferredSize(new Dimension(0, 0));
-        
         spelBord.add(UI, BorderLayout.PAGE_START);
-        UI.setPreferredSize(new Dimension(0, 100));
 
-        Spel TEST = new Spel();
+        Spel spel = new Spel();
         
-        TEST.setBorder(BorderFactory.createEmptyBorder(10,50,0,50));
-        //TEST.setLayout(new BorderLayout());
+        spel.setBorder(BorderFactory.createEmptyBorder(10,50,50,50));
         
-        spelBord.add(TEST);
-        //spelBord.add(new Spel());
+        spelBord.add(spel);
         
         setContentPane(spelBord);
         setSize(600,600);
@@ -110,6 +106,8 @@ public class BKE extends JFrame {
                 Spel.aantal_geklikt = 0;
                 Spel.aantal_zetten = 0;
                 Spel.over = false;
+                Spel.xWin = false;
+                Spel.oWin = false;
                 }
             }       
         }
@@ -118,12 +116,12 @@ public class BKE extends JFrame {
 
 class Spel extends JPanel{
     final String X = "X", O = "O";
-    public static boolean over = false;
+    public static boolean over = false, xWin = false, oWin = false;
     public static int scoreIntX, scoreIntO;
     public static int aantal_geklikt = 0, aantal_zetten = 0;
     public Spel(){
 
-        setLayout(new GridLayout(4,3,5,5));
+        setLayout(new GridLayout(3,3,5,5));
 
         BKE.vakken = new JButton[3][3];
         for (int i=0; i<3; i++){
@@ -133,7 +131,6 @@ class Spel extends JPanel{
                 add(BKE.vakken[i][j]);
             }
         }
-
     }
     
 
@@ -156,34 +153,31 @@ class Spel extends JPanel{
                 for (int j=0;j<3;j++){
                     //vakken[verticaal][horizontaal]
                     if(BKE.vakken[j][0].getText().equals(X) && BKE.vakken[j][1].getText().equals(X) && BKE.vakken[j][2].getText().equals(X)){
-                        //BKE.gewon1 1 nen.setText("X wint!");
-                        scoreIntX =+ 1;
-                        String scoreStrX = String.valueOf(scoreIntX);
-                        BKE.scoreLabX.setText(scoreStrX);
                         over = true;
+                        xWin = true;
                     } 
                     if(BKE.vakken[0][i].getText().equals(X) && BKE.vakken[1][i].getText().equals(X) && BKE.vakken[2][i].getText().equals(X)){
-                        //BKE.gewonnen.setText("X wint!");
+                        xWin = true;
                         over = true;
                     }
                     if(BKE.vakken[2][0].getText().equals(X) && BKE.vakken[1][1].getText().equals(X) && BKE.vakken[0][2].getText().equals(X) ||
                        BKE.vakken[0][0].getText().equals(X) && BKE.vakken[1][1].getText().equals(X) && BKE.vakken[2][2].getText().equals(X)){
-                        //BKE.gewonnen.setText("X wint!");
+                        xWin = true;
                         over = true;
                     }
                     
                     //Horizontale winconditie voor speler O
                     if (BKE.vakken[j][0].getText().equals(O) && BKE.vakken[j][1].getText().equals(O) && BKE.vakken[j][2].getText().equals(O)){
-                        //BKE.gewonnen.setText("O wint!");
+                        oWin = true;
                         over = true;
                     } // Verticale winconditie voor speler O
                     if(BKE.vakken[0][i].getText().equals(O) && BKE.vakken[1][i].getText().equals(O) && BKE.vakken[2][i].getText().equals(O)){
-                        //BKE.gewonnen.setText("O wint!");
+                        oWin = true;
                         over = true;
                     } //Diagonale winconditie voor speler O
                     if(BKE.vakken[2][0].getText().equals(O) && BKE.vakken[1][1].getText().equals(O) && BKE.vakken[0][2].getText().equals(O) ||
                        BKE.vakken[0][0].getText().equals(O) && BKE.vakken[1][1].getText().equals(O) && BKE.vakken[2][2].getText().equals(O)){
-                        //BKE.gewonnen.setText("O wint!");
+                        oWin = true;
                         over = true;
                     }
                     
@@ -197,6 +191,16 @@ class Spel extends JPanel{
                         //System.out.println(BKE.vakken[i][j]);
                     }
                 }
+            }
+            if(xWin == true){
+            scoreIntX = scoreIntX + 1;
+            String scoreStrX = "X : " + String.valueOf(scoreIntX);
+            BKE.scoreLabX.setText(scoreStrX);
+            }
+            if(oWin == true){
+            scoreIntO = scoreIntO + 1;
+            String scoreStrO = "O : " + String.valueOf(scoreIntO);
+            BKE.scoreLabO.setText(scoreStrO);
             }
         }
     }
