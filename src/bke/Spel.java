@@ -22,29 +22,18 @@ public class Spel extends JPanel{
                 BKE.vakken[i][j] = new JButton();
                 BKE.vakken[i][j].setFont(BKE.spelFont);
                 BKE.vakken[i][j].setBackground(Color.decode("#ECF0F1"));
-                if (tel > 2) {
-                    //BKE.vakken[i][j].setBorder(BorderFactory.createMatteBorder(1,0,0,0,Color.BLACK)); //boven
-                    boven = 3;
-                }
-                if (tel % 3 != 0){
-                    //BKE.vakken[i][j].setBorder(BorderFactory.createMatteBorder(0,1,0,0,Color.BLACK)); //links
-                    links = 3;
-                }
-                if (tel < 6) {
-                //BKE.vakken[i][j].setBorder(BorderFactory.createMatteBorder(0,0,1,0,Color.BLACK)); //onder
-                    onder = 3;
-                }
-                if (tel % 3 != 2){
-                //BKE.vakken[i][j].setBorder(BorderFactory.createMatteBorder(0,0,0,1,Color.BLACK)); //rechts
-                rechts = 3;
-                }
+                if (tel > 2)        boven = 3;
+                if (tel % 3 != 0)   links = 3;
+                if (tel < 6)        onder = 3;
+                if (tel % 3 != 2)   rechts = 3;
                 BKE.vakken[i][j].addActionListener(new KnopHandeler());
-                BKE.vakken[i][j].setBorder(BorderFactory.createMatteBorder(boven,links,onder,rechts,Color.decode("#696969")));
+                BKE.vakken[i][j].setBorder(BorderFactory.createMatteBorder(boven,links,onder,rechts,Color.decode("#2a2a2a")));
                 
                 boven = 0;
                 links = 0;
                 onder = 0;
                 rechts=0;
+                
                 add(BKE.vakken[i][j]);
                 tel++;
             }
@@ -73,7 +62,6 @@ public class Spel extends JPanel{
                     if(BKE.vakken[j][0].getText().equals(X) && BKE.vakken[j][1].getText().equals(X) && BKE.vakken[j][2].getText().equals(X)){
                         BKE.vakken[j][i].setBackground(Color.decode("#2C3E50"));
                         UIManager.put("Button.disabledText", Color.decode("#FFFFFF"));
-                        System.out.println("kms");
                         over = true;
                         xWin = true;
                     } 

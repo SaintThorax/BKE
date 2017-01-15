@@ -26,7 +26,7 @@ public class BKE extends JFrame {
     public static void main(String[] args) {        
         SwingUtilities.invokeLater(new Runnable(){
             public void run(){
-                new BKE().createSpelGUI();
+                new BKE().createMenuGUI();
             }
         });
     }
@@ -38,9 +38,14 @@ public class BKE extends JFrame {
         Titel.setPreferredSize(new Dimension(600,100));
         
         JPanel Menu = new JPanel();
+        JPanel keuzes = new JPanel();
+        keuzes.setBorder(BorderFactory.createEmptyBorder(100,0,0,0));
       
         tegenSpeler = new JButton("Speler - Speler");
         tegenSpeler.setFont(algemeenFont);
+        tegenSpeler.setFocusPainted(false);
+        tegenSpeler.setBackground(Color.decode("#ECF0F1"));
+        tegenSpeler.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
         tegenSpeler.setPreferredSize(new Dimension(500,100));
         tegenSpeler.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
@@ -48,8 +53,9 @@ public class BKE extends JFrame {
             }
         });
         
+        keuzes.add(tegenSpeler);
         Menu.add(Titel);
-        Menu.add(tegenSpeler);    
+        Menu.add(keuzes);    
         
         setContentPane(Menu);
         setSize(800,800);
@@ -82,6 +88,7 @@ public class BKE extends JFrame {
         reset.addActionListener(new ResetHandeler());
         
         menuKnop = new JButton("Menu");
+        menuKnop.setFocusPainted(false);
         menuKnop.setBackground(Color.decode("#ECF0F1"));
         menuKnop.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
         menuKnop.addActionListener(new ActionListener(){
@@ -89,6 +96,7 @@ public class BKE extends JFrame {
                 createMenuGUI();
             }
         });
+        menuKnop.addActionListener(new ResetHandeler());
              
         UI.add(menuKnop);
         UI.add(reset);
