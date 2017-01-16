@@ -19,8 +19,7 @@ public class BKE extends JFrame {
     
     private JPanel scoreX, scoreO;
     public static JLabel scoreLetterX, scoreNummerX, scoreLetterO, scoreNummerO, Titel;
-    private JButton reset, menuKnop, tegenSpeler;
-    public static JButton[][] vakken;
+    public static JButton reset, menuKnop, tegenSpeler;
     static JFrame frame;
       
     public static void main(String[] args) {        
@@ -107,31 +106,28 @@ public class BKE extends JFrame {
         UI.setPreferredSize(new Dimension(15, 100));
         UI.setLayout(new GridLayout(1,2,10,0));
 
-        JPanel spelBord = new JPanel();
-        spelBord.setLayout(new BorderLayout(60,40));
+        JPanel spelPaneel = new JPanel();
+        spelPaneel.setLayout(new BorderLayout(60,40));
         
-        JPanel test = new JPanel();
-        test.setBorder(BorderFactory.createEmptyBorder(0,50,0,50));
-        test.setLayout(new GridLayout(10,10,10,10));
-        Spel spel = new Spel();
-        //spel.setBackground(Color.decode("#d2d2d2"));
+        JPanel spelVakkenPaneel = new JPanel();
+        spelVakkenPaneel.setBorder(BorderFactory.createEmptyBorder(0,50,0,50));
+        Spel spelVakken = new Spel();
 
-        test.setLayout(new GridLayout(1,1,50,5));
-        test.setPreferredSize(new Dimension(100, 100));
+        spelVakkenPaneel.setLayout(new GridLayout(1,1,50,5));
+        spelVakkenPaneel.setPreferredSize(new Dimension(100, 100));
        
-        //spel.setBorder(BorderFactory.createLineBorder(Color.decode("#d2d2d2"), 4));
-        test.add(spel);
+        spelVakkenPaneel.add(spelVakken);
         
-        spelBord.add(score, BorderLayout.PAGE_START);
-        spelBord.add(UI, BorderLayout.PAGE_END);
-        spelBord.add(test);
+        spelPaneel.add(score, BorderLayout.PAGE_START);
+        spelPaneel.add(UI, BorderLayout.PAGE_END);
+        spelPaneel.add(spelVakkenPaneel);
         
-        for (Component c : spelBord.getComponents()){
+        for (Component c : spelPaneel.getComponents()){
             c.setBackground(Color.decode("#ECF0F1"));
         }
-        spelBord.setBackground(Color.decode("#ECF0F1"));
+        spelPaneel.setBackground(Color.decode("#ECF0F1"));
         
-        setContentPane(spelBord);
+        setContentPane(spelPaneel);
         setSize(800,800);
         setTitle("Quick and Dirty");
         setVisible(true);      
@@ -140,7 +136,7 @@ public class BKE extends JFrame {
     public void scoreCreateX(){
         scoreX = new JPanel();
         
-        scoreLetterX = new JLabel(Spel.X, SwingConstants.LEFT);
+        scoreLetterX = new JLabel(Spel.spelerX, SwingConstants.LEFT);
         scoreNummerX = new JLabel("-  ", SwingConstants.RIGHT);
         
         scoreLetterX.setFont(scoreLetterFont);
@@ -159,7 +155,7 @@ public class BKE extends JFrame {
     public void scoreCreateO(){
         scoreO = new JPanel();
         
-        scoreLetterO = new JLabel(Spel.O, SwingConstants.LEFT);
+        scoreLetterO = new JLabel(Spel.spelerO, SwingConstants.LEFT);
         scoreNummerO = new JLabel("- ", SwingConstants.RIGHT);
         
         scoreLetterO.setFont(scoreLetterFont);
@@ -179,10 +175,10 @@ public class BKE extends JFrame {
     public void actionPerformed(ActionEvent e){
         for (int i =0; i<3; i++){
             for (int j=0; j<3;j++){
-                vakken[i][j].setEnabled(true);
-                vakken[i][j].setBackground(Color.decode("#ECF0F1"));
+                Spel.vakken[i][j].setEnabled(true);
+                Spel.vakken[i][j].setBackground(Color.decode("#ECF0F1"));
                 //UIManager.put("Button.disabledText", Color.decode("#263248"));
-                vakken[i][j].setText("");
+                Spel.vakken[i][j].setText("");
                 Spel.aantal_geklikt = 0;
                 Spel.over = false;
                 Spel.xWin = false;
@@ -190,6 +186,6 @@ public class BKE extends JFrame {
                 }
             }       
         }
-    }
+    }   
 }
 
