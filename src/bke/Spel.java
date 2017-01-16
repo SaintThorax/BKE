@@ -1,22 +1,33 @@
 package bke;
 import java.awt.*;
+import java.util.List;
+import java.util.ArrayList;
 import java.awt.event.*;
 import javax.swing.*;
-import java.util.ArrayList;
 /**
  *
  * @author Thom
  */
+
 public class Spel extends JPanel{
+    
     final static String spelerX = "X", spelerO = "O";
+    public static JButton geklikt;
     public static String spelerAanZet;
     public static boolean over = false, xWin = false, oWin = false;
-    public static int scoreIntX, scoreIntO, test = 3;
+    public static int scoreIntX, scoreIntO;
     public static int boven, links, onder, rechts;
     public static JButton[][] vakken;
-    public static int aantal_geklikt = 0;
+    public static int aantalZetten = 0;
+    
+    public static ArrayList<Integer> mogelijkeZetten;
+    
     public Spel(){
-                
+       initSpel(); 
+    }
+
+    
+    public void initSpel(){
         setLayout(new GridLayout(3,3,5,5));
         vakken = new JButton[3][3];
         int tel = 0;
@@ -43,15 +54,39 @@ public class Spel extends JPanel{
         }
     }
     
-    public void checkForWin(){ 
-        checkRijen();
-        checkKolommen();
-        checkDiagonalenLR();
-        checkDiagonalenRL();
-        if (xWin == true || oWin == true){
-            System.out.println("Het spel is gewonnen, checkForWin()");
+    public int score(){
+       if (xWin == true){
+           return 10 - aantalZetten;
+       } 
+       else if (oWin == true){
+            return aantalZetten - 10;
         }
+       else {
+           return 0;
+       }
     }
+    
+    int diepte = 0;
+    public ArrayList<Integer> mogelijkeZetten(){
+        diepte += 1;
+        mogelijkeZetten = new ArrayList<>();
+        
+        for (int i = 0; i < 3; i++){
+            for(int j = 0; j<3; j++){
+                if(vakken[i][j].getText().equals("")){
+                    mogelijkeZetten.add(i);
+                    mogelijkeZetten.add(j);   
+                } 
+            }
+        }
+        
+        for (int i = 0; i <mogelijkeZetten.size();i+=2){
+            System.out.println(mogelijkeZetten.subList(i,i+2));
+        }
+        System.out.println("-----" + diepte + "-----");
+        return mogelijkeZetten;
+    }
+    
     
     public void checkRijen(){
         for (int i = 0; i < 3; i++){
@@ -126,59 +161,73 @@ public class Spel extends JPanel{
             }
         }
     }
+
+    public void checkSpelAfgelopen(){ 
+        checkRijen();
+        checkKolommen();
+        checkDiagonalenLR();
+        checkDiagonalenRL();
+        if (xWin == true || oWin == true){
+            score();
+            spelOver();
+        }
+        else if(aantalZetten >= 9 && over == false){
+            for(int i = 0;i<3;i++){
+                for (int j=0;j<3;j++){     
+                    vakken[i][j].setBackground(Color.decode("#b2b2b2"));
+                }
+            spelOver();
+            }
+        }
+    }   
+    public void spelOver(){
+        for(int i = 0;i<3;i++){
+            for (int j=0;j<3;j++){
+                vakken[i][j].setEnabled(false); // Schakelt alle vakken uit.
+            }
+        }
+        UIManager.put("Button.disabledText", Color.decode("#FFFFFF"));
+    }
+    
     public void spelerAanZet(){
-        if (aantal_geklikt % 2 != 0) { 
+        if (aantalZetten % 2 != 0) { 
             spelerAanZet = spelerX;
             UIManager.put("Button.disabledText", Color.decode("#2C3E50"));
         }
-        if (aantal_geklikt % 2 == 0) {
+        if (aantalZetten % 2 == 0) {
             spelerAanZet = spelerO;
             UIManager.put("Button.disabledText", Color.decode("#E74C3C"));
         } 
     }
+    
+    public void spel(){
+        aantalZetten++;
+        
+        spelerAanZet(); 
+        geklikt.setText(spelerAanZet);
 
+        mogelijkeZetten();
+        checkSpelAfgelopen();           
+        geklikt.setEnabled(false); 
+    }
+    
     class KnopHandeler implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            JButton geklikt = (JButton)e.getSource();          
-            aantal_geklikt++;
-            
-            spelerAanZet(); 
-            geklikt.setText(spelerAanZet);
-            
-            checkForWin();           
-            geklikt.setEnabled(false);  
-            
-            //Gelijk spel conditie
-            if(aantal_geklikt >= 9 && over == false){
-                for(int i = 0;i<3;i++){
-                    for (int j=0;j<3;j++){     
-                        vakken[i][j].setBackground(Color.decode("#b2b2b2"));
-                    }
-                over = true;
-                }
-            }
-
-            if(xWin == true){
-                scoreIntX = scoreIntX + 1;
-                String scoreStrX = String.valueOf(scoreIntX + " ");
-                BKE.scoreNummerX.setText(scoreStrX);
-                over = true;
-            }
-            if(oWin == true){
-                scoreIntO = scoreIntO + 1;
-                String scoreStrO = String.valueOf(scoreIntO + " ");
-                BKE.scoreNummerO.setText(scoreStrO);
-                over = true;
-            }
-            if(over == true){
-                for(int i = 0;i<3;i++){
-                    for (int j=0;j<3;j++){
-                        vakken[i][j].setEnabled(false); // Schakelt alle vakken uit.
-                    }
-                }
-                BKE.reset.setBackground(Color.decode("#989B9C"));
-                UIManager.put("Button.disabledText", Color.decode("#FFFFFF"));
-            }
+            geklikt = (JButton)e.getSource();          
+            spel();
         }
     }
+    
+    public void xWin(){
+        scoreIntX = scoreIntX + 1;
+        String scoreStrX = String.valueOf(scoreIntX + " ");
+        BKE.scoreNummerX.setText(scoreStrX);
+    }
+    public void oWin(){
+        if(oWin == true){
+            scoreIntO = scoreIntO + 1;
+            String scoreStrO = String.valueOf(scoreIntO + " ");
+            BKE.scoreNummerO.setText(scoreStrO);
+        }
+    }  
 } 

@@ -179,7 +179,7 @@ public class BKE extends JFrame {
                 Spel.vakken[i][j].setBackground(Color.decode("#ECF0F1"));
                 //UIManager.put("Button.disabledText", Color.decode("#263248"));
                 Spel.vakken[i][j].setText("");
-                Spel.aantal_geklikt = 0;
+                Spel.aantalZetten = 0;
                 Spel.over = false;
                 Spel.xWin = false;
                 Spel.oWin = false;
