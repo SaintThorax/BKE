@@ -63,6 +63,7 @@ public class BKE extends JFrame {
     }
         
     public void createSpelGUI(){
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         scoreCreateX();

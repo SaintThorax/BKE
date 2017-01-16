@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.ArrayList;
 import java.awt.event.*;
 import javax.swing.*;
+import java.lang.Math;
 /**
  *
  * @author Thom
+ * Ga Verder met implementeren minimax, via bron:
+ * http://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-3-tic-tac-toe-ai-finding-optimal-move/
  */
 
 public class Spel extends JPanel{
@@ -28,6 +31,7 @@ public class Spel extends JPanel{
 
     
     public void initSpel(){
+        
         setLayout(new GridLayout(3,3,5,5));
         vakken = new JButton[3][3];
         int tel = 0;
@@ -54,21 +58,54 @@ public class Spel extends JPanel{
         }
     }
     
-    public int score(){
+    public int minimax(JButton[][] vakken, int diepte, boolean isMax){
+       int best = -1000;
        if (xWin == true){
            return 10 - aantalZetten;
        } 
-       else if (oWin == true){
+       if (oWin == true){
             return aantalZetten - 10;
         }
-       else {
+       if (over == true && xWin == false && oWin == false) {
            return 0;
+       }
+       
+       if (isMax){
+           best = -1000;
+           
+           for(int i = 0; i<3; i++){
+               for (int j = 0; j<3; j++){
+                   vakken[i][j].setText(spelerX);
+                   best = Math.max(best,minimax(vakken, diepte+1, !isMax));
+                   vakken[i][j].setText("");
+               }
+           }
+       return best; 
+       }
+       else {
+           best = 1000;
+           
+           for(int i = 0; i<3; i++){
+               for(int j=0; j<3;j++){
+                   vakken[i][j].setText(spelerO);
+                   best = Math.max(best,minimax(vakken, diepte+1, !isMax));
+                   vakken[i][j].setText("");
+               }
+           }
+           return best;
        }
     }
     
-    int diepte = 0;
+//    int findBestMove(JButton[][] vakken){
+//        Move.bestMove;
+//        int bestVal = -1000;
+//        bestMove.row = -1;
+//        bestMove.col = -1;
+//    }
+    
+    //int diepte = 0;
     public ArrayList<Integer> mogelijkeZetten(){
-        diepte += 1;
+        //diepte += 1;
         mogelijkeZetten = new ArrayList<>();
         
         for (int i = 0; i < 3; i++){
@@ -83,7 +120,7 @@ public class Spel extends JPanel{
         for (int i = 0; i <mogelijkeZetten.size();i+=2){
             System.out.println(mogelijkeZetten.subList(i,i+2));
         }
-        System.out.println("-----" + diepte + "-----");
+        System.out.println("----------");
         return mogelijkeZetten;
     }
     
@@ -168,7 +205,7 @@ public class Spel extends JPanel{
         checkDiagonalenLR();
         checkDiagonalenRL();
         if (xWin == true || oWin == true){
-            score();
+            //minimax();
             spelOver();
         }
         else if(aantalZetten >= 9 && over == false){
