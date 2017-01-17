@@ -4,40 +4,80 @@ import java.util.List;
 import java.util.ArrayList;
 import java.awt.event.*;
 import javax.swing.*;
+import java.lang.Object;
+import java.awt.Component;
 import java.lang.Math;
+import java.util.Scanner;
 /**
  *
  * @author Thom
+ * test2
  * Ga Verder met implementeren minimax, via bron:
  * http://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-3-tic-tac-toe-ai-finding-optimal-move/
  */
 
+//class Zet{
+//    //public int rij,kol;
+//    public JButton[] rij, kol;
+//    public JButton[][] fuckVak;
+//    public Zet(){
+//        this.rij = rij;
+//        this.kol = kol;
+//    }
+//}
+
+class Turn {
+    enum NextMove{
+        O,X,E;
+    }
+    NextMove next;
+}
+
+class Point{
+    int x, y;
+    public Point(int x, int y){
+        this.x = x;
+        this.y = y;
+    }
+    @Override
+    public String toString(){
+        return "[" + x + "," + y + "]";
+    }
+}
+
 public class Spel extends JPanel{
+    
+    List<Point> availablePoints;
+    Scanner scan = new Scanner(System.in);
     
     final static String spelerX = "X", spelerO = "O";
     public static JButton geklikt;
-    public static String spelerAanZet;
-    public static boolean over = false, xWin = false, oWin = false;
+    public static String maakZet;
+    public static boolean over = false, xWin = false, oWin = false, spelerAanZet = true;
     public static int scoreIntX, scoreIntO;
     public static int boven, links, onder, rechts;
-    public static JButton[][] vakken;
+    public static JButton[][] vakken = new JButton[3][3];
+    public static JButton[] next, Holster = new JButton[9];
+    public static boolean isMax;
     public static int aantalZetten = 0;
+    
+    //Zet bestMove = new Zet();
     
     public static ArrayList<Integer> mogelijkeZetten;
     
     public Spel(){
        initSpel(); 
     }
+    
 
     
     public void initSpel(){
         
         setLayout(new GridLayout(3,3,5,5));
-        vakken = new JButton[3][3];
         int tel = 0;
         for (int i=0; i<3; i++){
             for (int j = 0; j<3;j++){
-                vakken[i][j] = new JButton();
+                vakken[i][j] = new JButton(" ");
                 vakken[i][j].setFont(BKE.spelFont);
                 vakken[i][j].setBackground(Color.decode("#ECF0F1"));
                 if (tel > 2)        boven = 3;
@@ -46,85 +86,88 @@ public class Spel extends JPanel{
                 if (tel % 3 != 2)   rechts = 3;
                 vakken[i][j].addActionListener(new KnopHandeler());
                 vakken[i][j].setBorder(BorderFactory.createMatteBorder(boven,links,onder,rechts,Color.decode("#2a2a2a")));
-                
+                Holster[tel] = (vakken[i][j]);
                 boven = 0;
                 links = 0;
                 onder = 0;
                 rechts=0;
                 
                 add(vakken[i][j]);
+                //add(Holster[tel]);
                 tel++;
             }
         }
     }
     
-    public int minimax(JButton[][] vakken, int diepte, boolean isMax){
-       int best = -1000;
-       if (xWin == true){
-           return 10 - aantalZetten;
-       } 
-       if (oWin == true){
-            return aantalZetten - 10;
-        }
-       if (over == true && xWin == false && oWin == false) {
-           return 0;
-       }
-       
-       if (isMax){
-           best = -1000;
-           
-           for(int i = 0; i<3; i++){
-               for (int j = 0; j<3; j++){
-                   vakken[i][j].setText(spelerX);
-                   best = Math.max(best,minimax(vakken, diepte+1, !isMax));
-                   vakken[i][j].setText("");
-               }
-           }
-       return best; 
-       }
-       else {
-           best = 1000;
-           
-           for(int i = 0; i<3; i++){
-               for(int j=0; j<3;j++){
-                   vakken[i][j].setText(spelerO);
-                   best = Math.max(best,minimax(vakken, diepte+1, !isMax));
-                   vakken[i][j].setText("");
-               }
-           }
-           return best;
-       }
-    }
-    
-//    int findBestMove(JButton[][] vakken){
-//        Move.bestMove;
-//        int bestVal = -1000;
-//        bestMove.row = -1;
-//        bestMove.col = -1;
-//    }
-    
-    //int diepte = 0;
-    public ArrayList<Integer> mogelijkeZetten(){
-        //diepte += 1;
-        mogelijkeZetten = new ArrayList<>();
-        
+    public List<Point> getAvailableStates(){
+        availablePoints = new ArrayList<>();
         for (int i = 0; i < 3; i++){
-            for(int j = 0; j<3; j++){
-                if(vakken[i][j].getText().equals("")){
-                    mogelijkeZetten.add(i);
-                    mogelijkeZetten.add(j);   
-                } 
+            for (int j = 0; j < 3; j++){
+                if (vakken[i][j].getText().equals(" ")){
+                    availablePoints.add(new Point(i,j));
+                }
             }
         }
-        
-        for (int i = 0; i <mogelijkeZetten.size();i+=2){
-            System.out.println(mogelijkeZetten.subList(i,i+2));
-        }
-        System.out.println("----------");
-        return mogelijkeZetten;
+        return availablePoints;
     }
     
+    public void placeAMove(Point point, String Player){
+        vakken[point.x][point.y].setText(Player);
+    }
     
+    Point computersMove;
+    
+    public boolean hasXWon(){
+        checkRijen();
+        //System.out.println("Rij" + xWin);
+        checkKolommen();
+        //System.out.println("Kol" + xWin);
+        checkDiagonalenLR();
+        //System.out.println("RL" + xWin);
+        checkDiagonalenRL();
+        //System.out.println("LR" + xWin);
+        //System.out.println("X check voorbij" + xWin);
+        return xWin;
+    }
+    public boolean hasOWon(){
+        //checkSpelAfgelopen();
+        //System.out.println("O" + oWin);
+        return oWin;
+    }
+    
+    public int minimax(int depth, int turn) {  
+        //checkSpelAfgelopen();
+        if (hasXWon()) return + 1;
+        if (hasOWon()) return -1;
+                
+        List<Point> pointsAvailable = getAvailableStates();
+        if (pointsAvailable.isEmpty()) return 0; 
+        System.out.println("Depth" + depth + turn);
+        
+        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+         
+        for (int i = 0; i < pointsAvailable.size(); ++i) {  
+            Point point = pointsAvailable.get(i);   
+            if (turn == 1) { 
+                placeAMove(point, spelerX); 
+                int currentScore = minimax(depth + 1, 1);
+                System.out.println("CS + DP" + currentScore + depth);
+                max = Math.max(currentScore, max);
+                
+                if(currentScore >= 0){ if(depth == 0) computersMove = point;} 
+                if(currentScore == 1){vakken[point.x][point.y].setText(" "); break;} 
+                if(i == pointsAvailable.size()-1 && max < 0){if(depth == 0)computersMove = point;}
+            } else if (turn == 2) {
+                placeAMove(point, spelerO); 
+                int currentScore = minimax(depth + 1, 2);
+                min = Math.min(currentScore, min); 
+                if(min == -1){vakken[point.x][point.y].setText(" "); break;}
+            }
+            vakken[point.x][point.y].setText(" "); //Reset this point
+        } 
+        return turn == 1?max:min;
+    } 
+     
     public void checkRijen(){
         for (int i = 0; i < 3; i++){
            for (int j=0;j<3;j++){     
@@ -141,12 +184,12 @@ public class Spel extends JPanel{
                }
            }
         }
+        //return false;
     }
     public void checkKolommen(){
         for(int i = 0;i<3;i++){
-                for (int j=0;j<3;j++){     
+            for (int j=0;j<3;j++){     
                 //vakken[verticaal][horizontaal]
-
                 if(vakken[0][i].getText().equals(spelerX) && vakken[1][i].getText().equals(spelerX) && vakken[2][i].getText().equals(spelerX) ||
                   (vakken[0][i].getText().equals(spelerO) && vakken[1][i].getText().equals(spelerO) && vakken[2][i].getText().equals(spelerO))){
                   if (vakken[j][i].getText().contains("X")){
@@ -156,7 +199,7 @@ public class Spel extends JPanel{
                         vakken[j][i].setBackground(Color.decode("#E74C3C")); 
                         oWin = true;
                     }
-               }
+                }
             }
         }
     }
@@ -168,12 +211,10 @@ public class Spel extends JPanel{
                     if (vakken[0][0].getText().contains("X")){ //Voert uit wanneer X van linksboven naar rechtsonder 3 op een rij heeft
                         for (int n = 0; n < 3 ; n++) vakken[n][n].setBackground(Color.decode("#2C3E50"));
                         xWin = true;
-                        return;
                     } 
                     else if (vakken[0][0].getText().contains("O")){ //Voert uit wanneer O van linksboven naar rechtsonder 3 op een rij heeft
                         for (int n = 0; n < 3 ; n++) vakken[n][n].setBackground(Color.decode("#E74C3C"));                     
                         oWin = true;
-                        return;
                     }
                 }
             }
@@ -187,16 +228,15 @@ public class Spel extends JPanel{
                     if (vakken[0][2].getText().contains("X")){ //Voert uit wanneer X van rechtsboven naar linksonder 3 op een rij heeft
                         for (int n = 0; n < 3 ; n++) vakken[2-n][n].setBackground(Color.decode("#2C3E50"));  
                         xWin = true;
-                        return;
                     } 
                     else if(vakken[0][2].getText().contains("O")){ //Voert uit wanneer O van rechtsboven naar linksonder 3 op een rij heeft
                         for (int n = 0; n < 3 ; n++) vakken[2-n][n].setBackground(Color.decode("#E74C3C"));   
                         oWin = true;
-                        return;
                     }
                 } 
             }
         }
+        //return false;
     }
 
     public void checkSpelAfgelopen(){ 
@@ -204,17 +244,8 @@ public class Spel extends JPanel{
         checkKolommen();
         checkDiagonalenLR();
         checkDiagonalenRL();
-        if (xWin == true || oWin == true){
-            //minimax();
+        if (xWin == true){
             spelOver();
-        }
-        else if(aantalZetten >= 9 && over == false){
-            for(int i = 0;i<3;i++){
-                for (int j=0;j<3;j++){     
-                    vakken[i][j].setBackground(Color.decode("#b2b2b2"));
-                }
-            spelOver();
-            }
         }
     }   
     public void spelOver(){
@@ -226,31 +257,53 @@ public class Spel extends JPanel{
         UIManager.put("Button.disabledText", Color.decode("#FFFFFF"));
     }
     
-    public void spelerAanZet(){
-        if (aantalZetten % 2 != 0) { 
-            spelerAanZet = spelerX;
-            UIManager.put("Button.disabledText", Color.decode("#2C3E50"));
-        }
-        if (aantalZetten % 2 == 0) {
-            spelerAanZet = spelerO;
-            UIManager.put("Button.disabledText", Color.decode("#E74C3C"));
-        } 
+    public void zetX(){
+        UIManager.put("Button.disabledText", Color.decode("#2C3E50"));
+        geklikt.setText(spelerX);
     }
-    
+    public void zetO(){
+        UIManager.put("Button.disabledText", Color.decode("#E74C3C"));
+        returnNextMove();
+        //if (over == true) System.out.println("GameOver");
+        //int next = returnNextMove();
+        //System.out.println(computersMove.x);
+        //Holster[returnNextMove()].setText(spelerO);
+        //System.out.println("e");
+        vakken[computersMove.x][computersMove.y].setText("O");
+        //vakken[computersMove.x][computersMove.y].setEnabled(false);
+    }
+    public void test(JButton[] x){
+        //x.setText("fool");
+    }
+
     public void spel(){
         aantalZetten++;
-        
-        spelerAanZet(); 
-        geklikt.setText(spelerAanZet);
 
-        mogelijkeZetten();
-        checkSpelAfgelopen();           
+        if (spelerAanZet == true){
+            zetX();
+            spelerAanZet = false;
+        }
+        else if (spelerAanZet == false){
+            zetO();
+            spelerAanZet = true;
+        }
         geklikt.setEnabled(false); 
+        checkSpelAfgelopen();
     }
+      
+    public int returnNextMove(){
+        if(over == true){
+            return -1;
+        }
+        minimax(1,1);
+        return 2 + 2;
+    }
+    
+    
     
     class KnopHandeler implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            geklikt = (JButton)e.getSource();          
+            geklikt = (JButton)e.getSource();
             spel();
         }
     }
@@ -259,12 +312,12 @@ public class Spel extends JPanel{
         scoreIntX = scoreIntX + 1;
         String scoreStrX = String.valueOf(scoreIntX + " ");
         BKE.scoreNummerX.setText(scoreStrX);
+        spelOver();
     }
     public void oWin(){
-        if(oWin == true){
-            scoreIntO = scoreIntO + 1;
-            String scoreStrO = String.valueOf(scoreIntO + " ");
-            BKE.scoreNummerO.setText(scoreStrO);
-        }
+        scoreIntO = scoreIntO + 1;
+        String scoreStrO = String.valueOf(scoreIntO + " ");
+        BKE.scoreNummerO.setText(scoreStrO);
+        spelOver();
     }  
 } 
