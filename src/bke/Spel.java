@@ -47,8 +47,7 @@ class Point{
 
 public class Spel extends JPanel{
     
-    List<Point> availablePoints;
-    Scanner scan = new Scanner(System.in);
+    ArrayList<Point> availableZetten;
     
     final static String spelerX = "X", spelerO = "O";
     public static JButton geklikt;
@@ -64,6 +63,7 @@ public class Spel extends JPanel{
     //Zet bestMove = new Zet();
     
     public static ArrayList<Integer> mogelijkeZetten;
+    public static List scores;
     
     public Spel(){
        initSpel(); 
@@ -99,16 +99,16 @@ public class Spel extends JPanel{
         }
     }
     
-    public List<Point> getAvailableStates(){
-        availablePoints = new ArrayList<>();
+    public ArrayList<Point> getAvailableStates(){
+        availableZetten = new ArrayList<>();
         for (int i = 0; i < 3; i++){
             for (int j = 0; j < 3; j++){
                 if (vakken[i][j].getText().equals(" ")){
-                    availablePoints.add(new Point(i,j));
+                    availableZetten.add(new Point(i,j));
                 }
             }
         }
-        return availablePoints;
+        return availableZetten;
     }
     
     public void placeAMove(Point point, String Player){
@@ -118,15 +118,10 @@ public class Spel extends JPanel{
     Point computersMove;
     
     public boolean hasXWon(){
-        checkRijen();
+        checkRijKolX();
         //System.out.println("Rij" + xWin);
-        checkKolommen();
+        checkDiagonalenX();
         //System.out.println("Kol" + xWin);
-        checkDiagonalenLR();
-        //System.out.println("RL" + xWin);
-        checkDiagonalenRL();
-        //System.out.println("LR" + xWin);
-        //System.out.println("X check voorbij" + xWin);
         return xWin;
     }
     public boolean hasOWon(){
@@ -135,116 +130,123 @@ public class Spel extends JPanel{
         return oWin;
     }
     
-    public int minimax(int depth, int turn) {  
+    public int minimax(Point mogSpel) {  
         //checkSpelAfgelopen();
-        if (hasXWon()) return + 1;
-        if (hasOWon()) return -1;
+        //depth ++;
+        if (hasXWon()) return 10; //- depth; // if X has won, return the score from his perspective
+        if (hasOWon()) return -10; // return depth - 10
                 
-        List<Point> pointsAvailable = getAvailableStates();
+        ArrayList<Integer> scores = new ArrayList<Integer>();
+        ArrayList<Point> pointsAvailable = getAvailableStates(); // create A list of every possible gamestate
         if (pointsAvailable.isEmpty()) return 0; 
-        System.out.println("Depth" + depth + turn);
+        //System.out.println("Depth" + depth + " " + turn);
         
         int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
          
         for (int i = 0; i < pointsAvailable.size(); ++i) {  
-            Point point = pointsAvailable.get(i);   
-            if (turn == 1) { 
-                placeAMove(point, spelerX); 
-                int currentScore = minimax(depth + 1, 1);
-                System.out.println("CS + DP" + currentScore + depth);
-                max = Math.max(currentScore, max);
-                
-                if(currentScore >= 0){ if(depth == 0) computersMove = point;} 
-                if(currentScore == 1){vakken[point.x][point.y].setText(" "); break;} 
-                if(i == pointsAvailable.size()-1 && max < 0){if(depth == 0)computersMove = point;}
-            } else if (turn == 2) {
-                placeAMove(point, spelerO); 
-                int currentScore = minimax(depth + 1, 2);
-                min = Math.min(currentScore, min); 
-                if(min == -1){vakken[point.x][point.y].setText(" "); break;}
-            }
-            vakken[point.x][point.y].setText(" "); //Reset this point
+            Point point = pointsAvailable.get(i); 
+            System.out.println("Point: "+point.toString());
+            int x1 = point.x;
+            int y1 = point.y;
+            scores.add(minimax(point));
+            System.out.println(x1 + " " + y1);
+            
+            
+            //scores[i] = minimax(point);
+            
+//            if (spelerAanZet == true) { 
+//                placeAMove(point, spelerX); 
+//                int currentScore = minimax(depth + 1, 1);
+//                System.out.println("CS + DP" + currentScore + depth);
+//                max = Math.max(currentScore, max);
+//                System.out.println(max);
+//                return max;
+//                //if(currentScore >= 0){ if(depth == 0) computersMove = point;} 
+//                //if(currentScore == 1){vakken[point.x][point.y].setText(" "); break;} 
+//                //if(i == pointsAvailable.size()-1 && max < 0){if(depth == 0)computersMove = point;}
+//            } else if (spelerAanZet == false) {
+//                placeAMove(point, spelerO); 
+//                int currentScore = minimax(depth + 1, 2);
+//                min = Math.min(currentScore, min); 
+//                if(min == -1){vakken[point.x][point.y].setText(" "); break;}
+//                //return min;
+//            }
+            //vakken[point.x][point.y].setText(" "); //Reset this point
         } 
-        return turn == 1?max:min;
+        if(spelerAanZet == true){
+            spelerAanZet = false ;
+            return max;
+        } else {
+            spelerAanZet = true;
+            return min;
+        }
     } 
      
-    public void checkRijen(){
+    public void checkRijKolX(){
         for (int i = 0; i < 3; i++){
            for (int j=0;j<3;j++){     
                 //vakken[verticaal][horizontaal]
                 if(vakken[j][0].getText().equals(spelerX) && vakken[j][1].getText().equals(spelerX) && vakken[j][2].getText().equals(spelerX) ||
-                  (vakken[j][0].getText().equals(spelerO) && vakken[j][1].getText().equals(spelerO) && vakken[j][2].getText().equals(spelerO))){
+                  (vakken[0][i].getText().equals(spelerX) && vakken[1][i].getText().equals(spelerX) && vakken[2][i].getText().equals(spelerX))){
                     if (vakken[j][i].getText().contains("X")){
                         vakken[j][i].setBackground(Color.decode("#2C3E50"));
                         xWin = true;
-                    } else {
-                        vakken[j][i].setBackground(Color.decode("#E74C3C")); 
-                        oWin = true;
                     }
-               }
-           }
-        }
+                }
+            }
         //return false;
+        }
     }
-    public void checkKolommen(){
+    public void checkRijKolO(){
         for(int i = 0;i<3;i++){
             for (int j=0;j<3;j++){     
                 //vakken[verticaal][horizontaal]
-                if(vakken[0][i].getText().equals(spelerX) && vakken[1][i].getText().equals(spelerX) && vakken[2][i].getText().equals(spelerX) ||
+                if(vakken[j][0].getText().equals(spelerO) && vakken[j][1].getText().equals(spelerO) && vakken[j][2].getText().equals(spelerO) ||
                   (vakken[0][i].getText().equals(spelerO) && vakken[1][i].getText().equals(spelerO) && vakken[2][i].getText().equals(spelerO))){
-                  if (vakken[j][i].getText().contains("X")){
-                        vakken[j][i].setBackground(Color.decode("#2C3E50"));
-                        xWin = true;
-                    } else {
-                        vakken[j][i].setBackground(Color.decode("#E74C3C")); 
+                  if (vakken[j][i].getText().contains("O")){
+                        vakken[j][i].setBackground(Color.decode("#E74C3C"));
                         oWin = true;
-                    }
+                    } 
                 }
             }
         }
     }
-    public void checkDiagonalenLR(){
+    public void checkDiagonalenX(){
         for(int i = 0;i<3;i++){
             for (int j=0;j<3;j++){ 
                 if (vakken[0][0].getText().equals(spelerX) && vakken[1][1].getText().equals(spelerX) && vakken[2][2].getText().equals(spelerX) ||
-                    vakken[0][0].getText().equals(spelerO) && vakken[1][1].getText().equals(spelerO) && vakken[2][2].getText().equals(spelerO)){
+                    vakken[0][2].getText().equals(spelerX) && vakken[1][1].getText().equals(spelerX) && vakken[2][0].getText().equals(spelerX)){
                     if (vakken[0][0].getText().contains("X")){ //Voert uit wanneer X van linksboven naar rechtsonder 3 op een rij heeft
                         for (int n = 0; n < 3 ; n++) vakken[n][n].setBackground(Color.decode("#2C3E50"));
                         xWin = true;
                     } 
-                    else if (vakken[0][0].getText().contains("O")){ //Voert uit wanneer O van linksboven naar rechtsonder 3 op een rij heeft
-                        for (int n = 0; n < 3 ; n++) vakken[n][n].setBackground(Color.decode("#E74C3C"));                     
-                        oWin = true;
-                    }
                 }
             }
         }
     }
-    public void checkDiagonalenRL(){
+    public void checkDiagonalenO(){
         for(int i = 0;i<3;i++){
             for (int j=0;j<3;j++){ 
-                if (vakken[0][2].getText().equals(spelerX) && vakken[1][1].getText().equals(spelerX) && vakken[2][0].getText().equals(spelerX) || 
+                if (vakken[0][0].getText().equals(spelerO) && vakken[1][1].getText().equals(spelerO) && vakken[2][2].getText().equals(spelerO) || 
                    (vakken[0][2].getText().equals(spelerO) && vakken[1][1].getText().equals(spelerO) && vakken[2][0].getText().equals(spelerO))){
-                    if (vakken[0][2].getText().contains("X")){ //Voert uit wanneer X van rechtsboven naar linksonder 3 op een rij heeft
-                        for (int n = 0; n < 3 ; n++) vakken[2-n][n].setBackground(Color.decode("#2C3E50"));  
-                        xWin = true;
-                    } 
-                    else if(vakken[0][2].getText().contains("O")){ //Voert uit wanneer O van rechtsboven naar linksonder 3 op een rij heeft
+                    if(vakken[0][2].getText().contains("O")){ //Voert uit wanneer O van rechtsboven naar linksonder 3 op een rij heeft
                         for (int n = 0; n < 3 ; n++) vakken[2-n][n].setBackground(Color.decode("#E74C3C"));   
                         oWin = true;
                     }
                 } 
             }
         }
-        //return false;
     }
 
     public void checkSpelAfgelopen(){ 
-        checkRijen();
-        checkKolommen();
-        checkDiagonalenLR();
-        checkDiagonalenRL();
+        checkRijKolX();
+        checkRijKolO();
+        checkDiagonalenX();
+        checkDiagonalenO();
         if (xWin == true){
+            spelOver();
+        }
+        if (oWin == true){
             spelOver();
         }
     }   
@@ -267,8 +269,8 @@ public class Spel extends JPanel{
         //if (over == true) System.out.println("GameOver");
         //int next = returnNextMove();
         //System.out.println(computersMove.x);
-        //Holster[returnNextMove()].setText(spelerO);
-        //System.out.println("e");
+        Holster[returnNextMove()].setText(spelerO);
+        System.out.println(returnNextMove());
         vakken[computersMove.x][computersMove.y].setText("O");
         //vakken[computersMove.x][computersMove.y].setEnabled(false);
     }
@@ -295,8 +297,10 @@ public class Spel extends JPanel{
         if(over == true){
             return -1;
         }
-        minimax(1,1);
-        return 2 + 2;
+        //getAvailableStates().;
+        //minimax();
+        System.out.println(computersMove.x + " " + computersMove.y);
+        return computersMove.x + computersMove.y;
     }
     
     
