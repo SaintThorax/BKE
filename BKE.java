@@ -31,7 +31,7 @@ public class BKE extends JFrame {
     }
     public void createMenuGUI(){
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-              
+        
         Titel = new JLabel("Boter-kaas-en-eieren", SwingConstants.CENTER);
         Titel.setFont(titelFont);
         Titel.setPreferredSize(new Dimension(600,100));
@@ -189,4 +189,3 @@ public class BKE extends JFrame {
         }
     }   
 }
-

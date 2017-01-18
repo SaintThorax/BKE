@@ -139,33 +139,55 @@ public class Spel extends JPanel{
         //checkSpelAfgelopen();
         if (hasXWon()) return + 1;
         if (hasOWon()) return -1;
-                
+        
         List<Point> pointsAvailable = getAvailableStates();
+        
         if (pointsAvailable.isEmpty()) return 0; 
         System.out.println("Depth" + depth + turn);
-        
+        depth+=1;
+        turn+=1;
+
         int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
          
         for (int i = 0; i < pointsAvailable.size(); ++i) {  
-            Point point = pointsAvailable.get(i);   
-            if (turn == 1) { 
+            Point point = pointsAvailable.get(i);  
+            System.out.println(pointsAvailable.size() + " " + pointsAvailable.get(i) );
+            if (spelerAanZet == true) { 
                 placeAMove(point, spelerX); 
                 int currentScore = minimax(depth + 1, 1);
-                System.out.println("CS + DP" + currentScore + depth);
+                System.out.println("CS + DP" + currentScore + depth + min + max);
                 max = Math.max(currentScore, max);
                 
-                if(currentScore >= 0){ if(depth == 0) computersMove = point;} 
-                if(currentScore == 1){vakken[point.x][point.y].setText(" "); break;} 
+                if(currentScore >= 0){
+                    if(depth == 0) computersMove = point;
+                } 
+                if(currentScore == 1){
+                    placeAMove(point, " "); 
+                    break;
+                } 
+                vakken[point.x][point.y].setText(" "); //Reset this point
+
                 if(i == pointsAvailable.size()-1 && max < 0){if(depth == 0)computersMove = point;}
-            } else if (turn == 2) {
+                //System.out.println(point + " " + computersMove + " " + pointsAvailable.size());
+            } else if (spelerAanZet == false) {
                 placeAMove(point, spelerO); 
+                
                 int currentScore = minimax(depth + 1, 2);
                 min = Math.min(currentScore, min); 
-                if(min == -1){vakken[point.x][point.y].setText(" "); break;}
+                if(min == -1){
+                    placeAMove(point, " ");
+                    break;
+                }
             }
-            vakken[point.x][point.y].setText(" "); //Reset this point
+           vakken[point.x][point.y].setText(" "); //Reset this point
         } 
-        return turn == 1?max:min;
+        if(turn % 2 != 0){
+            spelerAanZet = true ;
+            return max;
+        } else {
+            spelerAanZet = false;
+            return min;
+        }
     } 
      
     public void checkRijen(){
@@ -266,7 +288,7 @@ public class Spel extends JPanel{
         returnNextMove();
         //if (over == true) System.out.println("GameOver");
         //int next = returnNextMove();
-        //System.out.println(computersMove.x);
+        System.out.println(computersMove.x);
         //Holster[returnNextMove()].setText(spelerO);
         //System.out.println("e");
         vakken[computersMove.x][computersMove.y].setText("O");
