@@ -112,7 +112,7 @@ public class BKE extends JFrame {
         
         JPanel spelVakkenPaneel = new JPanel();
         spelVakkenPaneel.setBorder(BorderFactory.createEmptyBorder(0,50,0,50));
-        Spel spelVakken = new Spel();
+        Spelbord spelVakken = new Spelbord();
 
         spelVakkenPaneel.setLayout(new GridLayout(1,1,50,5));
         spelVakkenPaneel.setPreferredSize(new Dimension(100, 100));
