@@ -19,7 +19,7 @@ public class BKE extends JFrame {
     
     private JPanel scoreX, scoreO;
     public static JLabel scoreLetterX, scoreNummerX, scoreLetterO, scoreNummerO, Titel;
-    public static JButton reset, menuKnop, tegenSpeler;
+    public static JButton reset, menuKnop, tegenSpeler, tegenComputer;
     static JFrame frame;
       
     public static void main(String[] args) {        
@@ -39,6 +39,7 @@ public class BKE extends JFrame {
         JPanel Menu = new JPanel();
         JPanel keuzes = new JPanel();
         keuzes.setBorder(BorderFactory.createEmptyBorder(100,0,0,0));
+        keuzes.setLayout(new GridLayout(2,1,10,50));
       
         tegenSpeler = new JButton("Speler - Speler");
         tegenSpeler.setFont(algemeenFont);
@@ -51,8 +52,15 @@ public class BKE extends JFrame {
                 createSpelGUI();
             }
         });
+        tegenComputer = new JButton("Speler - Computer");
+        tegenComputer.setFont(algemeenFont);
+        tegenComputer.setFocusPainted(false);
+        tegenComputer.setBackground(Color.decode("#ECF0F1"));
+        tegenComputer.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
+        tegenComputer.setPreferredSize(new Dimension(500,100));
         
         keuzes.add(tegenSpeler);
+        keuzes.add(tegenComputer);
         Menu.add(Titel);
         Menu.add(keuzes);    
         
@@ -112,7 +120,7 @@ public class BKE extends JFrame {
         
         JPanel spelVakkenPaneel = new JPanel();
         spelVakkenPaneel.setBorder(BorderFactory.createEmptyBorder(0,50,0,50));
-        Spelbord spelVakken = new Spelbord();
+        Spel spelVakken = new Spel();
 
         spelVakkenPaneel.setLayout(new GridLayout(1,1,50,5));
         spelVakkenPaneel.setPreferredSize(new Dimension(100, 100));
