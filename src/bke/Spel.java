@@ -1,6 +1,5 @@
 package bke;
 import java.awt.*;
-import java.lang.Math;
 import java.util.List;
 import java.util.ArrayList;
 import java.awt.event.*;
@@ -10,7 +9,6 @@ import javax.swing.*;
  *
  * @author Thom
  */
-
 class Zet{
     int kol, rij;
     public Zet(int kol, int rij){
@@ -24,7 +22,7 @@ public class Spel extends JPanel{
     final static String spelerX = "X", spelerO = "O";
     public static JButton geklikt;
     public static String spelerAanZet;
-    public static boolean over = false, xWin = false, oWin = false, xZouWinnen, oZouWinnen;
+    public static boolean over = false, xWin = false, oWin = false;
     public static int scoreIntX, scoreIntO;
     public static int boven, links, onder, rechts;
     public static JButton[][] vakken;
@@ -45,7 +43,7 @@ public class Spel extends JPanel{
         int tel = 0;
         for (int i=0; i<3; i++){
             for (int j = 0; j<3;j++){
-                vakken[i][j] = new JButton(" "); //vakken is a button[vertical][horizontal]
+                vakken[i][j] = new JButton(); //vakken is a button[vertical][horizontal]
                 vakken[i][j].setFont(BKE.spelFont);
                 vakken[i][j].setBackground(Color.decode("#ECF0F1"));
                 if (tel > 2)        boven = 3; //These variables decide the border on the buttons
@@ -60,12 +58,14 @@ public class Spel extends JPanel{
                 onder = 0;
                 rechts=0;
                 
+                /* Zou dit kunnen gebruiken om knoppen te refrencen*/
+                //System.out.println(vakken[i][j].hashCode()); 
                 add(vakken[i][j]);
                 tel++;
             }
         }
     }
-       
+    
     public void checkRijen(){ //Checks the rows
         for (int i = 0; i < 3; i++){
            for (int j=0;j<3;j++){     
@@ -73,11 +73,11 @@ public class Spel extends JPanel{
                 if(vakken[j][0].getText().equals(spelerX) && vakken[j][1].getText().equals(spelerX) && vakken[j][2].getText().equals(spelerX) ||
                   (vakken[j][0].getText().equals(spelerO) && vakken[j][1].getText().equals(spelerO) && vakken[j][2].getText().equals(spelerO))){
                     if (vakken[j][i].getText().contains("X")){
-                        //vakken[j][i].setBackground(Color.decode("#2C3E50"));
-                        xZouWinnen = true;
+                        vakken[j][i].setBackground(Color.decode("#2C3E50"));
+                        xWin = true;
                     } else {
-                        //vakken[j][i].setBackground(Color.decode("#E74C3C")); 
-                        oZouWinnen = true;
+                        vakken[j][i].setBackground(Color.decode("#E74C3C")); 
+                        oWin = true;
                     }
                }
            }
@@ -89,11 +89,11 @@ public class Spel extends JPanel{
                 if(vakken[0][i].getText().equals(spelerX) && vakken[1][i].getText().equals(spelerX) && vakken[2][i].getText().equals(spelerX) ||
                   (vakken[0][i].getText().equals(spelerO) && vakken[1][i].getText().equals(spelerO) && vakken[2][i].getText().equals(spelerO))){
                   if (vakken[j][i].getText().contains("X")){
-                        //vakken[j][i].setBackground(Color.decode("#2C3E50"));
-                        xZouWinnen = true;
+                        vakken[j][i].setBackground(Color.decode("#2C3E50"));
+                        xWin = true;
                     } else {
-                        //vakken[j][i].setBackground(Color.decode("#E74C3C")); 
-                        oZouWinnen = true;
+                        vakken[j][i].setBackground(Color.decode("#E74C3C")); 
+                        oWin = true;
                     }
                }
             }
@@ -105,13 +105,13 @@ public class Spel extends JPanel{
                 if (vakken[0][0].getText().equals(spelerX) && vakken[1][1].getText().equals(spelerX) && vakken[2][2].getText().equals(spelerX) ||
                     vakken[0][0].getText().equals(spelerO) && vakken[1][1].getText().equals(spelerO) && vakken[2][2].getText().equals(spelerO)){
                     if (vakken[0][0].getText().contains("X")){ //Voert uit wanneer X van linksboven naar rechtsonder 3 op een rij heeft
-                        //for (int n = 0; n < 3 ; n++) vakken[n][n].setBackground(Color.decode("#2C3E50"));
-                        xZouWinnen = true;
+                        for (int n = 0; n < 3 ; n++) vakken[n][n].setBackground(Color.decode("#2C3E50"));
+                        xWin = true;
                         return;
                     } 
                     else if (vakken[0][0].getText().contains("O")){ //Voert uit wanneer O van linksboven naar rechtsonder 3 op een rij heeft
-                        //for (int n = 0; n < 3 ; n++) vakken[n][n].setBackground(Color.decode("#E74C3C"));                     
-                        oZouWinnen = true;
+                        for (int n = 0; n < 3 ; n++) vakken[n][n].setBackground(Color.decode("#E74C3C"));                     
+                        oWin = true;
                         return;
                     }
                 }
@@ -124,13 +124,13 @@ public class Spel extends JPanel{
                 if (vakken[0][2].getText().equals(spelerX) && vakken[1][1].getText().equals(spelerX) && vakken[2][0].getText().equals(spelerX) || 
                    (vakken[0][2].getText().equals(spelerO) && vakken[1][1].getText().equals(spelerO) && vakken[2][0].getText().equals(spelerO))){
                     if (vakken[0][2].getText().contains("X")){ //Voert uit wanneer X van rechtsboven naar linksonder 3 op een rij heeft
-                        //for (int n = 0; n < 3 ; n++) vakken[2-n][n].setBackground(Color.decode("#2C3E50"));  
-                        xZouWinnen = true;
+                        for (int n = 0; n < 3 ; n++) vakken[2-n][n].setBackground(Color.decode("#2C3E50"));  
+                        xWin = true;
                         return;
                     } 
                     else if(vakken[0][2].getText().contains("O")){ //Voert uit wanneer O van rechtsboven naar linksonder 3 op een rij heeft
-                        //for (int n = 0; n < 3 ; n++) vakken[2-n][n].setBackground(Color.decode("#E74C3C"));   
-                        oZouWinnen = true;
+                        for (int n = 0; n < 3 ; n++) vakken[2-n][n].setBackground(Color.decode("#E74C3C"));   
+                        oWin = true;
                         return;
                     }
                 } 
@@ -155,16 +155,10 @@ public class Spel extends JPanel{
                 for (int j=0;j<3;j++){     
                     vakken[i][j].setBackground(Color.decode("#b2b2b2"));
                 }
+            spelOver();
             }
         }
     }   
-    
-    public void checkSpelGewonnen(){ //checks if the game is over
-        checkRijen();
-        checkKolommen();
-        checkDiagonalenLR();
-        checkDiagonalenRL();
-    }  
     public void spelOver(){ //Runs when game is over and disables all buttons
         for(int i = 0;i<3;i++){
             for (int j=0;j<3;j++){
@@ -174,35 +168,35 @@ public class Spel extends JPanel{
         UIManager.put("Button.disabledText", Color.decode("#FFFFFF"));
     }
     
-    public void xZet(){
-        spelerAanZet = spelerX;
-        UIManager.put("Button.disabledText", Color.decode("#2C3E50"));
-        geklikt.setText(spelerAanZet); //sets the text on a button to the string value of the current player
-    }
-    public void oZet(){
-        spelerAanZet = spelerO;
-        System.out.println(spelerAanZet);
-        
-        int next = returnNextMove();
-        //vakken[computersZet.kol][computersZet.rij].setText(spelerO);
-        System.out.println(next + "This is next");
+    public void spelerAanZet(){ //Decides who's turn it is 
+        if (aantalZetten % 2 != 0) { //aantalZetten is the amount of turns passed
+            spelerAanZet = spelerX;
+            UIManager.put("Button.disabledText", Color.decode("#2C3E50"));
+        }
+        if (aantalZetten % 2 == 0) {
+            spelerAanZet = spelerO;
+            UIManager.put("Button.disabledText", Color.decode("#E74C3C"));
+        } 
     }
     
     public void spel(){ //Runs whenever a button gets clicked
         aantalZetten++; //The integer value of the amount of made moves
-
-        xZet();             
-        oZet();    
+        mogelijkeZetten();
+                
+        spelerAanZet(); 
+        geklikt.setText(spelerAanZet); //sets the text on a button to the string value of the current player
+       
+        checkSpelAfgelopen();     //checks if the game has finished   
         geklikt.setEnabled(false); //disables the pressed button
-        
+        System.out.println(waarde());
     }
     
     class KnopHandeler implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            geklikt = (JButton)e.getSource(); //gives the clicked button a way to refrence 
+            geklikt = (JButton)e.getSource(); //gives the clicked button a way to refrence      
             spel();
-            }
         }
+    }
     
     public void xWin(){ //runs when x wins
         scoreIntX = scoreIntX + 1;
@@ -214,89 +208,58 @@ public class Spel extends JPanel{
             scoreIntO = scoreIntO + 1;
             String scoreStrO = String.valueOf(scoreIntO + " ");
             BKE.scoreNummerO.setText(scoreStrO);
-        } 
-    }
-    
-    Zet computersZet;
-    
-    public int minimax1(int aantalZetten, String speler){
-        checkSpelGewonnen();
-        if (xZouWinnen == true) return aantalZetten - 10;
-        if (oZouWinnen == true) return 10 - aantalZetten;
-        List<Zet> mogelijkeZettenMM = mogelijkeZetten();
-        if (mogelijkeZettenMM.isEmpty()) return 0;
-        
-        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
-        int currentScore;
-
-        for (int i = 0; i < mogelijkeZettenMM.size(); i++){
-            //System.out.println(mogelijkeZettenMM.size());
-            Zet zet = mogelijkeZettenMM.get(i);
-            if(spelerAanZet.equals(spelerO)){
-                maakEenZet(zet, spelerO); 
-                currentScore = minimax1(aantalZetten + 1, spelerX);
-                
-                max = Math.max(currentScore, max);
-                
-                if(aantalZetten == 0)System.out.println("Score for position "+(i+1)+" = "+currentScore);
-                if(currentScore >= 0){ 
-                    if (aantalZetten == 0){
-                        System.out.println(currentScore);
-                        computersZet = zet;
-                    }
-                } 
-                if(currentScore == 1){ 
-                    vakken[zet.kol][zet.rij].setText(" "); 
-                    break;
-                } 
-                if(i == mogelijkeZettenMM.size()-1 && max < 0){
-                    if(aantalZetten == 0){
-                        computersZet = zet;
-                    }
-                }
-                
-            } else if (spelerAanZet.equals(spelerX)){
-                maakEenZet(zet, spelerX);
-                currentScore = minimax1(aantalZetten+1, spelerO); 
-                min = Math.min(currentScore, min);
-                System.out.println(min);
-                
-                if (min == -1){
-                    vakken[zet.kol][zet.rij].setText(" ");
-                    System.out.println("dit is hem");
-                   // break;
-                }
-                vakken[zet.kol][zet.rij].setText(" ");
-            }
         }
-        //System.out.println(computersZet.rij);
-        return (spelerAanZet.equals(spelerO)? min : max);
-    }
-    
-    public int returnNextMove() {
-        checkSpelGewonnen();
-        if (xWin == true || oWin == true){
-            return -1;
-        }
-        minimax1(0, spelerO);
-        return computersZet.kol + computersZet.rij;
-    }
+    }  
     
     public List<Zet> mogelijkeZetten(){
         zetten = new ArrayList<>();
         for (int i = 0; i<3; i++){
             for(int j= 0; j<3; j++){
-                if (vakken[i][j].getText().equals(" ")){
+                if (vakken[i][j].getText().equals("")){
                     zetten.add(new Zet(i,j));
                 }
             }
         }
-        //System.out.println(zetten);
+        System.out.println(zetten.hashCode());
         return zetten;
     }
     
-    public void maakEenZet(Zet zet, String speler){
-        vakken[zet.kol][zet.rij].setText(spelerO);
+    public int minimax(Spel status, int diepte, String spelerAanZet){
+        /* als status kan ik geklikt gebruiken denk ik
+        Als diepte aantalZetten
+        spelerAanZet is wanneer de computerspeelt spelerO
+        */
+        List<Zet> zettenMinimax = mogelijkeZetten();
+        if (diepte == 0 || zettenMinimax.size() -1 ==0 ){
+            return 0; //spelWaarde();
+            /**
+             * Spelwaarde is een functie waarmee de waarde van het bord wordth berekent. Voor elke van de 8 win lijen 
+             * rijen:[00-01-02], [10-11-12], [20-21-22]
+             * kolommen: [00-10-20], [01-11-21], [02-12-22]
+             * diagonalen: [00-11-22], [02-11-20]
+             * als er een X en O op dezelfde lijn zitten is de score 0 punten
+             * Asl er 1 unieke speler op een lijn zit is die lijn 1 punt
+             * Als er 2 unieke spelers op een lijn zitten is die lijn 10 punten
+             * Als er 3 unieke spelers op een lijn zitten is die lijn 100 punten is de speler de winnaar
+             */
+        }
+        return 0;
     }
     
+    public int waarde(){
+        
+        int waarde = 0;
+        
+        for (int i=0; i<3; i++){
+            for (int j=0; j<3; j++){
+                if (vakken[j][0].getText().equals(vakken[j][1].getText()) && vakken[j][0].getText().equals(spelerAanZet)){
+                    waarde = 100;
+                    if (vakken[j][0].getText().equals(vakken[j][2].getText()) && vakken[j][0].getText().equals(spelerAanZet)){
+                        waarde = 1000;
+                    }                  
+                }
+            }
+        }
+        return waarde;
+    }
 } 
