@@ -25,7 +25,7 @@ public class BKE extends JFrame {
     public static void main(String[] args) {        
         SwingUtilities.invokeLater(new Runnable(){
             public void run(){
-                new BKE().createSpelGUI();
+                new BKE().createMenuGUI();
             }
         });
     }
@@ -41,6 +41,17 @@ public class BKE extends JFrame {
         keuzes.setBorder(BorderFactory.createEmptyBorder(100,0,0,0));
         keuzes.setLayout(new GridLayout(2,1,10,50));
       
+        tegenComputer = new JButton("Speler - Computer");
+        tegenComputer.setFont(algemeenFont);
+        tegenComputer.setFocusPainted(false);
+        tegenComputer.setBackground(Color.decode("#ECF0F1"));
+        tegenComputer.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
+        tegenComputer.setPreferredSize(new Dimension(500,100));
+        tegenComputer.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                createSpelGUI();
+            }
+        });
         tegenSpeler = new JButton("Speler - Speler");
         tegenSpeler.setFont(algemeenFont);
         tegenSpeler.setFocusPainted(false);
@@ -49,18 +60,12 @@ public class BKE extends JFrame {
         tegenSpeler.setPreferredSize(new Dimension(500,100));
         tegenSpeler.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                createSpelGUI();
+                tegenSpelerGUI();
             }
         });
-        tegenComputer = new JButton("Speler - Computer");
-        tegenComputer.setFont(algemeenFont);
-        tegenComputer.setFocusPainted(false);
-        tegenComputer.setBackground(Color.decode("#ECF0F1"));
-        tegenComputer.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
-        tegenComputer.setPreferredSize(new Dimension(500,100));
         
-        keuzes.add(tegenSpeler);
         keuzes.add(tegenComputer);
+        keuzes.add(tegenSpeler);
         Menu.add(Titel);
         Menu.add(keuzes);    
         
@@ -71,7 +76,6 @@ public class BKE extends JFrame {
     }
         
     public void createSpelGUI(){
-
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         scoreCreateX();
@@ -120,11 +124,11 @@ public class BKE extends JFrame {
         
         JPanel spelVakkenPaneel = new JPanel();
         spelVakkenPaneel.setBorder(BorderFactory.createEmptyBorder(0,50,0,50));
-        Spel spelVakken = new Spel();
 
         spelVakkenPaneel.setLayout(new GridLayout(1,1,50,5));
         spelVakkenPaneel.setPreferredSize(new Dimension(100, 100));
-       
+        
+        Spel spelVakken = new Spel();
         spelVakkenPaneel.add(spelVakken);
         
         spelPaneel.add(score, BorderLayout.PAGE_START);
@@ -140,6 +144,77 @@ public class BKE extends JFrame {
         setSize(800,800);
         setTitle("Quick and Dirty");
         setVisible(true);      
+    } 
+    
+    public void tegenSpelerGUI(){
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        scoreCreateX();
+        scoreCreateO();
+        
+        JPanel score = new JPanel();
+
+        score.setPreferredSize(new Dimension(10,100));
+        score.setLayout(new GridLayout(1,2,5,5));
+        score.setBorder(BorderFactory.createEmptyBorder(10,10,0,10));
+       
+        score.add(scoreX);
+        score.add(scoreO);
+        
+        JPanel UI = new JPanel();
+        UI.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        UI.setLayout(new BorderLayout());
+        
+        reset = new JButton("Nieuw spel");
+        reset.setBackground(Color.decode("#ECF0F1"));       
+        reset.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
+        reset.addActionListener(new ResetMens());
+        
+        menuKnop = new JButton("Menu");
+        menuKnop.setFocusPainted(false);
+        menuKnop.setBackground(Color.decode("#ECF0F1"));
+        menuKnop.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
+        menuKnop.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                createMenuGUI();
+            }
+        });
+        menuKnop.addActionListener(new ResetMens());
+             
+        UI.add(menuKnop);
+        UI.add(reset);
+        
+        for (Component c : UI.getComponents()){
+            c.setFont(algemeenFont);
+        }
+        UI.setPreferredSize(new Dimension(15, 100));
+        UI.setLayout(new GridLayout(1,2,10,0));
+
+        JPanel spelPaneel = new JPanel();
+        spelPaneel.setLayout(new BorderLayout(60,40));
+        
+        JPanel spelVakkenPaneel = new JPanel();
+        spelVakkenPaneel.setBorder(BorderFactory.createEmptyBorder(0,50,0,50));
+
+        spelVakkenPaneel.setLayout(new GridLayout(1,1,50,5));
+        spelVakkenPaneel.setPreferredSize(new Dimension(100, 100));
+        
+        TegenMens spelVakken = new TegenMens();
+        spelVakkenPaneel.add(spelVakken);
+        
+        spelPaneel.add(score, BorderLayout.PAGE_START);
+        spelPaneel.add(UI, BorderLayout.PAGE_END);
+        spelPaneel.add(spelVakkenPaneel);
+        
+        for (Component c : spelPaneel.getComponents()){
+            c.setBackground(Color.decode("#ECF0F1"));
+        }
+        spelPaneel.setBackground(Color.decode("#ECF0F1"));
+        
+        setContentPane(spelPaneel);
+        setSize(800,800);
+        setTitle("Quick and Dirty");
+        setVisible(true); 
     }
     
     public void scoreCreateX(){
@@ -197,5 +272,21 @@ public class BKE extends JFrame {
             }       
         }
     }   
+    class ResetMens implements ActionListener{        
+    public void actionPerformed(ActionEvent e){
+        for (int i =0; i<3; i++){
+            for (int j=0; j<3;j++){
+                TegenMens.vakken[i][j].setEnabled(true);
+                TegenMens.vakken[i][j].setBackground(Color.decode("#ECF0F1"));
+                //UIManager.put("Button.disabledText", Color.decode("#263248"));
+                TegenMens.vakken[i][j].setText("");
+                TegenMens.aantalZetten = 0;
+                TegenMens.over = false;
+                TegenMens.xWin = false;
+                TegenMens.oWin = false;
+                }
+            }       
+        }
+    }
 }
 
