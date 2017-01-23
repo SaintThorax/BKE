@@ -1,8 +1,10 @@
 package bke;
 import java.awt.*;
 import java.util.List;
+import java.lang.Math;
 import java.util.ArrayList;
 import java.awt.event.*;
+import java.util.Random;
 import javax.swing.*;
 
 /**
@@ -10,26 +12,39 @@ import javax.swing.*;
  * @author Thom
  */
 class Zet{
-    int kol, rij;
-    public Zet(int kol, int rij){
-        this.kol = kol;
+    int rij, kol;
+    public Zet(int rij, int kol){
         this.rij = rij;
+        this.kol = kol;
+    }
+}
+
+class ZetEnScores{
+    int score;
+    Zet zet;
+    
+    ZetEnScores(int score, Zet zet){
+        this.score = score;
+        this.zet = zet;
     }
 }
 
 public class Spel extends JPanel{
     
     final static String spelerX = "X", spelerO = "O";
+    public String tegenstander;
     public static JButton geklikt;
     public static String spelerAanZet;
-    public static boolean over = false, xWin = false, oWin = false;
-    public static int scoreIntX, scoreIntO;
+    public static boolean over = false, xWin = false, oWin = false, spelerIsMens = true;
+    public static boolean hasXWon, hasOWon;
+    public static int scoreIntX, scoreIntO, waarde;
     public static int boven, links, onder, rechts;
     public static JButton[][] vakken;
-    public static int aantalZetten = 0;
+    public static int aantalZetten = 0, tel = 0;
     
+    Random rand = new Random();
     public ArrayList<Integer> moves; 
-    public List<Zet> zetten, zetMinimax, mogelijkeZettenMM;
+    public List<Zet> zetten, mogelijkeZettenMM, gemaakteZetten;
     public Zet gemaakteZet;    
     
     public Spel(){
@@ -59,7 +74,6 @@ public class Spel extends JPanel{
                 rechts=0;
                 
                 /* Zou dit kunnen gebruiken om knoppen te refrencen*/
-                //System.out.println(vakken[i][j].hashCode()); 
                 add(vakken[i][j]);
                 tel++;
             }
@@ -170,27 +184,51 @@ public class Spel extends JPanel{
     
     public void spelerAanZet(){ //Decides who's turn it is 
         if (aantalZetten % 2 != 0) { //aantalZetten is the amount of turns passed
+            tegenstander = spelerO;
             spelerAanZet = spelerX;
             UIManager.put("Button.disabledText", Color.decode("#2C3E50"));
+                      
         }
         if (aantalZetten % 2 == 0) {
+            tegenstander = spelerX;
             spelerAanZet = spelerO;
-            UIManager.put("Button.disabledText", Color.decode("#E74C3C"));
+          //minimax(1, true);
+            Zet test = returnBestMove();
+            System.out.println("test: [" + test.rij + "," + test.kol + "]");
+            placeAMove(returnBestMove(), spelerO);
+        
+            //spelerAanZet();
+            spelerIsMens = true;
+            
         } 
     }
     
     public void spel(){ //Runs whenever a button gets clicked
         aantalZetten++; //The integer value of the amount of made moves
-        mogelijkeZetten();
-                
+       
         spelerAanZet(); 
         geklikt.setText(spelerAanZet); //sets the text on a button to the string value of the current player
-       
-        checkSpelAfgelopen();     //checks if the game has finished   
-        geklikt.setEnabled(false); //disables the pressed button
-        System.out.println(waarde());
+        geklikt.setEnabled(false); //disables the pressed button      
+        spelerIsMens = false;  
+        
+        System.out.println("De waarde van " + spelerAanZet + " is: "  + waarde());      
+        checkSpelAfgelopen();     //checks if the game has finished 
+        
+        callMinimax(0,false);
+        for (ZetEnScores zes : rootsChildrenScores) {
+                System.out.println("Point: [" + zes.zet.rij + "," + zes.zet.kol+ "]" + " Score: " + zes.score);
+        }
+        
+        aantalZetten++;
+        spelerAanZet();
+        checkSpelAfgelopen();
     }
     
+    public void placeAMove(Zet zet, String spelerAanZet) {
+        vakken[zet.rij][zet.kol].setText(spelerAanZet);   
+        //System.out.println(zet.rij + "," + zet.kol);
+    }
+        
     class KnopHandeler implements ActionListener{
         public void actionPerformed(ActionEvent e){
             geklikt = (JButton)e.getSource(); //gives the clicked button a way to refrence      
@@ -220,43 +258,213 @@ public class Spel extends JPanel{
                 }
             }
         }
-        System.out.println(zetten.hashCode());
         return zetten;
     }
     
-    public int minimax(Spel status, int diepte, String spelerAanZet){
-        /* als status kan ik geklikt gebruiken denk ik
-        Als diepte aantalZetten
-        spelerAanZet is wanneer de computerspeelt spelerO
-        */
-        List<Zet> zettenMinimax = mogelijkeZetten();
-        if (diepte == 0 || zettenMinimax.size() -1 ==0 ){
-            return 0; //spelWaarde();
-            /**
-             * Spelwaarde is een functie waarmee de waarde van het bord wordth berekent. Voor elke van de 8 win lijen 
-             * rijen:[00-01-02], [10-11-12], [20-21-22]
-             * kolommen: [00-10-20], [01-11-21], [02-12-22]
-             * diagonalen: [00-11-22], [02-11-20]
-             * als er een X en O op dezelfde lijn zitten is de score 0 punten
-             * Asl er 1 unieke speler op een lijn zit is die lijn 1 punt
-             * Als er 2 unieke spelers op een lijn zitten is die lijn 10 punten
-             * Als er 3 unieke spelers op een lijn zitten is die lijn 100 punten is de speler de winnaar
-             */
+    
+    public int returnMin(List<Integer> list) {
+        int min = Integer.MAX_VALUE;
+        int index = -1;
+        for (int i = 0; i < list.size(); ++i) {
+            if (list.get(i) < min) {
+                min = list.get(i);
+                index = i;
+            }
         }
-        return 0;
+        return list.get(index);
+    }
+
+    public int returnMax(List<Integer> list) {
+        int max = Integer.MIN_VALUE;
+        int index = -1;
+        for (int i = 0; i < list.size(); ++i) {
+            if (list.get(i) > max) {
+                max = list.get(i);
+                index = i;
+            }
+        }
+        //System.out.println(list.get(index));
+        return list.get(index);
+    }
+    
+    public Zet returnBestMove() {
+        int MAX = -100000;
+        int best = -1;
+        
+        for (int i = 0; i < rootsChildrenScores.size(); ++i) { 
+            if (MAX < rootsChildrenScores.get(i).score) {
+                MAX = rootsChildrenScores.get(i).score;
+                best = i;
+            }
+        }
+        return rootsChildrenScores.get(best).zet;
+    }
+    
+    List<ZetEnScores> rootsChildrenScores;
+    
+    public void callMinimax(int diepte, boolean spelerIsMens){
+        rootsChildrenScores = new ArrayList<>();
+        minimax(diepte, spelerIsMens);
+        //System.out.println("call Minimax voert minimax uit");
+        //System.out.println("Minimax: " + minimax(diepte, spelerIsMens));
+    }
+    
+    public void testCheck(){
+        checkRijen();
+        checkKolommen();
+        checkDiagonalenLR();
+        checkDiagonalenRL();
+        
+    }
+    
+    public int minimax(int diepte, boolean spelerIsMens){
+        List<Zet> zettenMinimax = mogelijkeZetten();
+        //System.out.println("Size van zettenMinimax: " + zettenMinimax.size());
+        
+        waarde();
+        if (hasOWon == true) { 
+            hasOWon = false;
+            return diepte-10; 
+        } else {
+        }
+        if (hasXWon == true) { 
+            hasXWon = false;
+            return 10-diepte;             
+        } else {
+        }
+        if (zettenMinimax.isEmpty()) {
+            return 0;
+        }
+        
+        List<Integer> scores = new ArrayList<>();
+        
+        for (int i = 0; i < zettenMinimax.size(); i++) {
+            Zet zet = zettenMinimax.get(i);
+            System.out.println("Zet: [" + zet.rij + "," + zet.kol + "]");
+            if (spelerIsMens == true){
+                placeAMove(zet, spelerX);
+                int huidigeScore = minimax(diepte+1, false);
+                scores.add(huidigeScore);
+                
+                
+            } else if (spelerIsMens == false){
+                placeAMove(zet, spelerO);
+                int huidigeScore = minimax(diepte+1, true);
+                scores.add(huidigeScore);
+                if (diepte == 0){
+                    //System.err.println("Huidigescore, zet = " + huidigeScore + "[" + zet.rij + "," + zet.kol + "]" + " spelerIsMens = " + spelerIsMens);
+                    rootsChildrenScores.add(new ZetEnScores(huidigeScore, zet));
+                }
+            }
+            vakken[zet.rij][zet.kol].setText("");
+        } 
+        System.out.println(scores+ "-");
+        return ((spelerIsMens) ? returnMax(scores) : returnMin(scores));
     }
     
     public int waarde(){
         
         int waarde = 0;
         
-        for (int i=0; i<3; i++){
-            for (int j=0; j<3; j++){
-                if (vakken[j][0].getText().equals(vakken[j][1].getText()) && vakken[j][0].getText().equals(spelerAanZet)){
-                    waarde = 100;
-                    if (vakken[j][0].getText().equals(vakken[j][2].getText()) && vakken[j][0].getText().equals(spelerAanZet)){
-                        waarde = 1000;
-                    }                  
+        ArrayList<JButton[]> lijnen = new ArrayList<JButton[]>();
+        
+        /*
+        * Spelwaarde is een functie waarmee de waarde van het bord wordth berekent. Voor elke van de 8 win lijen 
+        * rijen:[00-01-02], [10-11-12], [20-21-22]
+        * kolommen: [00-10-20], [01-11-21], [02-12-22]
+        * diagonalen: [00-11-22], [02-11-20]
+        * als er een X en O op dezelfde lijn zitten is de score 0 punten
+        * Als er 2 unieke spelers op een lijn zitten is die lijn 10 punten
+        * Als er 3 unieke spelers op een lijn zitten is die lijn 100 punten is de speler de winnaar
+        */
+   
+        JButton[] lijn1 = new JButton[3];  //bovenste rij vakken       
+        JButton[] lijn2 = new JButton[3]; // middelste rij vakken
+        JButton[] lijn3 = new JButton[3]; // onderste rij vakken
+        JButton[] lijn4 = new JButton[3]; // meest linkse kolom vakken
+        JButton[] lijn5 = new JButton[3]; // middelste kolom vakken
+        JButton[] lijn6 = new JButton[3]; // onderste kolom vakken
+        
+        for (int i = 0;i<3; i++){
+            lijn1[i] = vakken[0][i];
+            lijn2[i] = vakken[1][i];
+            lijn3[i] = vakken[2][i];
+            
+            lijn4[i] = vakken[i][0];
+            lijn5[i] = vakken[i][1];
+            lijn6[i] = vakken[i][2];
+        }
+        
+        lijnen.add(lijn1);
+        lijnen.add(lijn2);
+        lijnen.add(lijn3);
+        lijnen.add(lijn4);
+        lijnen.add(lijn5);
+        lijnen.add(lijn6);
+        
+        for (JButton[] lijn : lijnen){
+            for(int i = 0; i<lijn.length; i++){
+                for (int j = i+1; j<3;j++){
+                    if (lijn[i].getText().equals(lijn[j].getText()) && lijn[i].getText().equals(spelerAanZet)){
+                        waarde += 10;
+                        //System.out.println("2 op een rij");
+
+                        if ((lijn[0].getText().equals(tegenstander)) || lijn[1].getText().equals(tegenstander) || lijn[2].getText().equals(tegenstander)){
+                            //System.out.println("verschillende " + lijn[j].getText());
+                            waarde -= 10;
+                        }
+                        
+                        if (lijn[0].getText().equals(lijn[1].getText()) && lijn[0].getText().equals(lijn[2].getText())){ 
+                            //System.out.println(spelerAanZet + " wint!");
+                            waarde = 1000;
+                            if (spelerIsMens){
+                                hasXWon = true;
+                            } else {
+                                hasOWon = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        ArrayList<JButton[]> diagLijnen = new ArrayList<JButton[]>();
+        JButton[] diagLijn1 = new JButton[3];  //Diagonale lijn van linksboven naar rechtsonder   
+        JButton[] diagLijn2 = new JButton[3]; // Diagonale lijn van rechtsboven naar linksonder
+        
+        Integer[] diag = {2,1,0};
+        
+        for (int i = 0; i < 3; i++){
+            diagLijn1[i] = vakken[i][i];
+            diagLijn2[i] = vakken[i][diag[i]];
+        }
+        diagLijnen.add(diagLijn1);
+        diagLijnen.add(diagLijn2);
+        
+        for (JButton[] diagLijn : diagLijnen){
+            for(int i = 0; i<diagLijn.length; i++){
+                for (int j = i+1; j<3; j++){
+                    if (diagLijn[i].getText().equals(diagLijn[j].getText()) && diagLijn[i].getText().equals(spelerAanZet)){
+                        //System.out.println("2 op een diagonale lijn");
+                        waarde += 10;
+                    
+                        if (diagLijn[0].getText().equals(tegenstander) || diagLijn[1].getText().equals(tegenstander) || diagLijn[2].getText().equals(tegenstander)){
+                            //System.out.println("Diagonale verschillende spelers op een diagonale lijn");
+                            waarde -= 10;
+                            break;
+                        }
+                        if (diagLijn[0].getText().equals(diagLijn[1].getText()) && diagLijn[0].getText().equals(diagLijn[2].getText())){ 
+                            //System.out.println(spelerAanZet + " wint!");
+                            waarde = 1000;
+                            if (spelerAanZet.equals(spelerX)){
+                                hasXWon = true;
+                            } else {
+                                hasOWon = true;
+                            }
+                            break;
+                        }
+                    }
                 }
             }
         }
