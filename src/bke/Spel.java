@@ -37,8 +37,8 @@ public class Spel extends JPanel{
     public static String spelerAanZet;
     public static boolean over = false, xWin = false, oWin = false, spelerIsMens = true;
     public static boolean hasXWon, hasOWon;
-    public static int scoreIntX, scoreIntO, waarde;
-    public static int boven, links, onder, rechts;
+    public static int scoreIntX, scoreIntO, waarde, xMMS, oMMS;
+    public static int boven, links, onder, rechts, zettenVoorbijO = 0;
     public static JButton[][] vakken;
     public static int aantalZetten = 0, tel = 0;
     
@@ -177,10 +177,12 @@ public class Spel extends JPanel{
         for(int i = 0;i<3;i++){
             for (int j=0;j<3;j++){
                 vakken[i][j].setEnabled(false); // Schakelt alle vakken uit.
+                zettenVoorbijO = 0;
             }
         }
         UIManager.put("Button.disabledText", Color.decode("#FFFFFF"));
     }
+    
     
     public void spelerAanZet(){ //Decides who's turn it is 
         if (aantalZetten % 2 != 0) { //aantalZetten is the amount of turns passed
@@ -193,10 +195,17 @@ public class Spel extends JPanel{
             tegenstander = spelerX;
             spelerAanZet = spelerO;
           //minimax(1, true);
-            Zet test = returnBestMove();
-            System.out.println("test: [" + test.rij + "," + test.kol + "]");
-            placeAMove(returnBestMove(), spelerO);
-        
+            
+            if (zettenVoorbijO % 2 == 0){
+                Zet best = returnBestMove(true);
+                System.out.println("best: [" + best.rij + "," + best.kol + "]");
+                placeAMove(returnBestMove(true), spelerO);
+            } else {
+                Zet worst = returnBestMove(true);
+                System.out.println("worst: [" + worst.rij + "," + worst.kol + "]");
+                placeAMove(returnBestMove(true), spelerO);
+            }
+            zettenVoorbijO ++;
             //spelerAanZet();
             spelerIsMens = true;
             
@@ -287,16 +296,27 @@ public class Spel extends JPanel{
         return list.get(index);
     }
     
-    public Zet returnBestMove() {
+    public Zet returnBestMove(boolean bestOrWorst) {
         int MAX = -100000;
+        int MIN = 1000000;
         int best = -1;
         
-        for (int i = 0; i < rootsChildrenScores.size(); ++i) { 
-            if (MAX < rootsChildrenScores.get(i).score) {
-                MAX = rootsChildrenScores.get(i).score;
-                best = i;
+        if (bestOrWorst){
+            for (int i = 0; i < rootsChildrenScores.size(); ++i) { 
+                if (MAX < rootsChildrenScores.get(i).score) {
+                    MAX = rootsChildrenScores.get(i).score;
+                    best = i;
+                } 
+            }   
+        } else {
+            for (int i = 0; i < rootsChildrenScores.size(); i++) {
+                if (MIN > rootsChildrenScores.get(i).score) {
+                    MIN = rootsChildrenScores.get(i).score;
+                    best = i;
+                }               
             }
         }
+        //System.out.println(rootsChildrenScores.get(worst).zet.rij + " " + rootsChildrenScores.get(worst).zet.kol);
         return rootsChildrenScores.get(best).zet;
     }
     
@@ -313,38 +333,29 @@ public class Spel extends JPanel{
         checkRijen();
         checkKolommen();
         checkDiagonalenLR();
-        checkDiagonalenRL();
-        
+        checkDiagonalenRL();       
     }
     
     public int minimax(int diepte, boolean spelerIsMens){
         List<Zet> zettenMinimax = mogelijkeZetten();
         //System.out.println("Size van zettenMinimax: " + zettenMinimax.size());
+        if (hasXWon()){ System.out.println("Ey"); return diepte-10;}
+        if (hasOWon()){ System.out.println("Nee"); return 10-diepte; }
         
-        waarde();
-        if (hasOWon == true) { 
-            hasOWon = false;
-            return diepte-10; 
-        } else {
-        }
-        if (hasXWon == true) { 
-            hasXWon = false;
-            return 10-diepte;             
-        } else {
-        }
         if (zettenMinimax.isEmpty()) {
             return 0;
         }
-        
+                
         List<Integer> scores = new ArrayList<>();
         
         for (int i = 0; i < zettenMinimax.size(); i++) {
+            
             Zet zet = zettenMinimax.get(i);
-            System.out.println("Zet: [" + zet.rij + "," + zet.kol + "]");
+            //System.out.println("Zet: [" + zet.rij + "," + zet.kol + "]");
             if (spelerIsMens == true){
                 placeAMove(zet, spelerX);
-                int huidigeScore = minimax(diepte+1, false);
-                scores.add(huidigeScore);
+                //int huidigeScore = minimax(diepte+1, false);
+                scores.add(minimax(diepte+1, false));
                 
                 
             } else if (spelerIsMens == false){
@@ -352,14 +363,13 @@ public class Spel extends JPanel{
                 int huidigeScore = minimax(diepte+1, true);
                 scores.add(huidigeScore);
                 if (diepte == 0){
-                    //System.err.println("Huidigescore, zet = " + huidigeScore + "[" + zet.rij + "," + zet.kol + "]" + " spelerIsMens = " + spelerIsMens);
                     rootsChildrenScores.add(new ZetEnScores(huidigeScore, zet));
                 }
             }
             vakken[zet.rij][zet.kol].setText("");
         } 
-        System.out.println(scores+ "-");
-        return ((spelerIsMens) ? returnMax(scores) : returnMin(scores));
+        //System.out.println(scores+ "-");
+        return ((spelerIsMens) ? returnMin(scores) : returnMax(scores));
     }
     
     public int waarde(){
@@ -470,4 +480,37 @@ public class Spel extends JPanel{
         }
         return waarde;
     }
+    
+    public boolean hasXWon(){ //Checks the rows
+        for (int i = 0; i < 3; i++){
+           for (int j=0;j<3;j++){     
+                //vakken[verticaal][horizontaal]
+                if(vakken[j][0].getText().equals(spelerX) && vakken[j][1].getText().equals(spelerX) && vakken[j][2].getText().equals(spelerX) ||
+                  (vakken[0][i].getText().equals(spelerX) && vakken[1][i].getText().equals(spelerX) && vakken[2][i].getText().equals(spelerX))){
+                    return true;
+               } if ((vakken[0][0].getText().equals(spelerX) && vakken[1][1].getText().equals(spelerX) && vakken[2][2].getText().equals(spelerX) ||
+                       (vakken[0][2].getText().equals(spelerX) && vakken[1][1].getText().equals(spelerX) && vakken[2][0].getText().equals(spelerX)))){
+                   return true;
+               }
+           }
+        }
+        return false;
+    }
+
+    public boolean hasOWon(){ //Checks the rows
+        for (int i = 0; i < 3; i++){
+           for (int j=0;j<3;j++){     
+                //vakken[verticaal][horizontaal]
+                if(vakken[j][0].getText().equals(spelerO) && vakken[j][1].getText().equals(spelerO) && vakken[j][2].getText().equals(spelerO) ||
+                  (vakken[0][i].getText().equals(spelerO) && vakken[1][i].getText().equals(spelerO) && vakken[2][i].getText().equals(spelerO))){
+                    return true;
+               } if ((vakken[0][0].getText().equals(spelerO) && vakken[1][1].getText().equals(spelerO) && vakken[2][2].getText().equals(spelerO) ||
+                       (vakken[0][2].getText().equals(spelerO) && vakken[1][1].getText().equals(spelerO) && vakken[2][0].getText().equals(spelerO)))){
+                   return true;
+               }
+           }
+        }
+        return false;
+    }
+
 } 

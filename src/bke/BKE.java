@@ -192,6 +192,7 @@ public class BKE extends JFrame {
                 Spel.over = false;
                 Spel.xWin = false;
                 Spel.oWin = false;
+                Spel.zettenVoorbijO = 0;
                 }
             }       
         }
