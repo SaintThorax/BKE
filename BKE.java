@@ -9,6 +9,12 @@ import java.awt.Font;
 import java.awt.event.*;
 import javax.swing.*;
 
+/**
+ * In deze class zijn alle schermen ontworpen. Dit is de klasse waarmee het spel begint. Vanuit de main functie wordt het menu gemaakt en als volgt het spel.
+ * In deze class is ook het resetten van het spel gemaakt. Zo kan ik deze altijd aanroepen, en zullen de waardes die niet moeten resetten ook niet reset worden.
+ * @author tfpva
+ */
+
 public class BKE extends JFrame {
 
     public static Font spelFont = new Font("Berlin Sans FB", Font.PLAIN, 100);
@@ -19,19 +25,26 @@ public class BKE extends JFrame {
     
     private JPanel scoreX, scoreO;
     public static JLabel scoreLetterX, scoreNummerX, scoreLetterO, scoreNummerO, Titel;
-    public static JButton reset, menuKnop, tegenSpeler;
+    public static JButton reset, menuKnop, tegenSpeler, tegenComputer;
     static JFrame frame;
       
     public static void main(String[] args) {        
         SwingUtilities.invokeLater(new Runnable(){
             public void run(){
+                //Door de run methode kan ik een methode maken voor het maken van het menu, en deze op verschillende momenten aanroepen. 
+                //Omdat ik de main functie niet kan aanroepen, is dit de beste manier.
                 new BKE().createMenuGUI();
             }
         });
     }
+    
+    /**
+     * Besluit de layout en design van het menu, de code spreekt eigenlijk voorzich
+     */
     public void createMenuGUI(){
+        //De design van het menu
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+              
         Titel = new JLabel("Boter-kaas-en-eieren", SwingConstants.CENTER);
         Titel.setFont(titelFont);
         Titel.setPreferredSize(new Dimension(600,100));
@@ -39,7 +52,19 @@ public class BKE extends JFrame {
         JPanel Menu = new JPanel();
         JPanel keuzes = new JPanel();
         keuzes.setBorder(BorderFactory.createEmptyBorder(100,0,0,0));
+        keuzes.setLayout(new GridLayout(2,1,10,50));
       
+        tegenComputer = new JButton("Speler - Computer");
+        tegenComputer.setFont(algemeenFont);
+        tegenComputer.setFocusPainted(false);
+        tegenComputer.setBackground(Color.decode("#ECF0F1"));
+        tegenComputer.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
+        tegenComputer.setPreferredSize(new Dimension(500,100));
+        tegenComputer.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                createSpelGUI();
+            }
+        });
         tegenSpeler = new JButton("Speler - Speler");
         tegenSpeler.setFont(algemeenFont);
         tegenSpeler.setFocusPainted(false);
@@ -48,10 +73,11 @@ public class BKE extends JFrame {
         tegenSpeler.setPreferredSize(new Dimension(500,100));
         tegenSpeler.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                createSpelGUI();
+                tegenSpelerGUI();
             }
         });
         
+        keuzes.add(tegenComputer);
         keuzes.add(tegenSpeler);
         Menu.add(Titel);
         Menu.add(keuzes);    
@@ -61,9 +87,11 @@ public class BKE extends JFrame {
         setTitle("Quick and Dirty");
         setVisible(true); 
     }
-        
+       
+    /**
+     * Besluit de layout en design van het spel, de code spreekt eigenlijk voorzich
+     */
     public void createSpelGUI(){
-
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         scoreCreateX();
@@ -112,11 +140,11 @@ public class BKE extends JFrame {
         
         JPanel spelVakkenPaneel = new JPanel();
         spelVakkenPaneel.setBorder(BorderFactory.createEmptyBorder(0,50,0,50));
-        Spel spelVakken = new Spel();
 
         spelVakkenPaneel.setLayout(new GridLayout(1,1,50,5));
         spelVakkenPaneel.setPreferredSize(new Dimension(100, 100));
-       
+        
+        Spel spelVakken = new Spel();
         spelVakkenPaneel.add(spelVakken);
         
         spelPaneel.add(score, BorderLayout.PAGE_START);
@@ -132,8 +160,86 @@ public class BKE extends JFrame {
         setSize(800,800);
         setTitle("Quick and Dirty");
         setVisible(true);      
+    } 
+    
+    /**
+     * Besluit de layout van het spel tegen de speler, kopiërd de meeste dingen van de createSpelGUI methode, het is niet goed om het te kopiëren, 
+     * maar dat is momenteel de makkelijkste optie
+     */
+    public void tegenSpelerGUI(){
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        scoreCreateX();
+        scoreCreateO();
+        
+        JPanel score = new JPanel();
+
+        score.setPreferredSize(new Dimension(10,100));
+        score.setLayout(new GridLayout(1,2,5,5));
+        score.setBorder(BorderFactory.createEmptyBorder(10,10,0,10));
+       
+        score.add(scoreX);
+        score.add(scoreO);
+        
+        JPanel UI = new JPanel();
+        UI.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        UI.setLayout(new BorderLayout());
+        
+        reset = new JButton("Nieuw spel");
+        reset.setBackground(Color.decode("#ECF0F1"));       
+        reset.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
+        reset.addActionListener(new ResetMens());
+        
+        menuKnop = new JButton("Menu");
+        menuKnop.setFocusPainted(false);
+        menuKnop.setBackground(Color.decode("#ECF0F1"));
+        menuKnop.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
+        menuKnop.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                createMenuGUI();
+            }
+        });
+        menuKnop.addActionListener(new ResetMens());
+             
+        UI.add(menuKnop);
+        UI.add(reset);
+        
+        for (Component c : UI.getComponents()){
+            c.setFont(algemeenFont);
+        }
+        UI.setPreferredSize(new Dimension(15, 100));
+        UI.setLayout(new GridLayout(1,2,10,0));
+
+        JPanel spelPaneel = new JPanel();
+        spelPaneel.setLayout(new BorderLayout(60,40));
+        
+        JPanel spelVakkenPaneel = new JPanel();
+        spelVakkenPaneel.setBorder(BorderFactory.createEmptyBorder(0,50,0,50));
+
+        spelVakkenPaneel.setLayout(new GridLayout(1,1,50,5));
+        spelVakkenPaneel.setPreferredSize(new Dimension(100, 100));
+        
+        TegenMens spelVakken = new TegenMens();
+        spelVakkenPaneel.add(spelVakken);
+        
+        spelPaneel.add(score, BorderLayout.PAGE_START);
+        spelPaneel.add(UI, BorderLayout.PAGE_END);
+        spelPaneel.add(spelVakkenPaneel);
+        
+        for (Component c : spelPaneel.getComponents()){
+            c.setBackground(Color.decode("#ECF0F1"));
+        }
+        spelPaneel.setBackground(Color.decode("#ECF0F1"));
+        
+        setContentPane(spelPaneel);
+        setSize(800,800);
+        setTitle("Quick and Dirty");
+        setVisible(true); 
     }
     
+    /*
+    Hier worden de scoreborden voor X en O aangemaakt. Ik heb hiervoor aparte funties gemaakt om de code wat schoner en overzichterlijk te houden.
+    */
     public void scoreCreateX(){
         scoreX = new JPanel();
         
@@ -172,6 +278,11 @@ public class BKE extends JFrame {
         scoreO.add(scoreNummerO);
     }
 
+    
+    /*
+    De resethandelers voor beide spellen resetten eigenlijk alle variables die gebruikt worden bij het beslissen van een winnaar, de regels, de logica ect. 
+    Deze worden ook aangeroepen het spel terug naar het menu gaat, zo wordt het hele speler reset als iemand besluit iets anders te spelen
+    */
     class ResetHandeler implements ActionListener{        
     public void actionPerformed(ActionEvent e){
         for (int i =0; i<3; i++){
@@ -184,8 +295,25 @@ public class BKE extends JFrame {
                 Spel.over = false;
                 Spel.xWin = false;
                 Spel.oWin = false;
+                Spel.zettenVoorbijO = 0;
                 }
             }       
         }
     }   
+    class ResetMens implements ActionListener{        
+    public void actionPerformed(ActionEvent e){
+        for (int i =0; i<3; i++){
+            for (int j=0; j<3;j++){
+                TegenMens.vakken[i][j].setEnabled(true);
+                TegenMens.vakken[i][j].setBackground(Color.decode("#ECF0F1"));
+                //UIManager.put("Button.disabledText", Color.decode("#263248"));
+                TegenMens.vakken[i][j].setText("");
+                TegenMens.aantalZetten = 0;
+                TegenMens.over = false;
+                TegenMens.xWin = false;
+                TegenMens.oWin = false;
+                }
+            }       
+        }
+    }
 }
